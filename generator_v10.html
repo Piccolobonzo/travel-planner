@@ -3293,7 +3293,7 @@ function buildTripContext(ctx) {
     (ctx.journeys && ctx.journeys.length ? "\nJOURNEY INSERITI: " + ctx.journeys.map(function(j) { return j.label + " " + j.date; }).join(", ") : "");
 }
 
-var TRIPCRAFT_API_ENDPOINT = "https://tripcraft-api.vercel.app/api/generate";
+var TRIPCRAFT_API_ENDPOINT = "https://tripcraft-api-nu.vercel.app/api/generate";
 
 async function callApi(accessCode, systemPrompt, userMsg, maxTokens) {
   var accessCodeVal = accessCode || (document.getElementById("access-code") || {}).value.trim().toUpperCase();
