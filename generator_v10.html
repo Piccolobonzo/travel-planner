@@ -1,0 +1,3878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Planner Generator</title>
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root {
+  --bg:         #0f1117;
+  --bg2:        #171b26;
+  --bg3:        #1e2330;
+  --border:     #2a3040;
+  --border2:    #3a4358;
+  --accent:     #4f9ef8;
+  --accent2:    #7bc4e2;
+  --green:      #3ecf8e;
+  --yellow:     #f0c060;
+  --red:        #e05555;
+  --text:       #e8eaf0;
+  --text2:      #8a94a8;
+  --text3:      #5a6278;
+  --mono:       'Courier New', Courier, monospace;
+  --sans:       -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius:     6px;
+  --radius2:    10px;
+}
+body.light {
+  --bg:         #f4f6fb;
+  --bg2:        #ffffff;
+  --bg3:        #edf0f7;
+  --border:     #d0d8e8;
+  --border2:    #b0bdd0;
+  --accent:     #2563eb;
+  --accent2:    #0ea5e9;
+  --green:      #059669;
+  --yellow:     #d97706;
+  --red:        #dc2626;
+  --text:       #1a2035;
+  --text2:      #4a5568;
+  --text3:      #8a94a8;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.logo span { color: var(--text2); font-weight: normal; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.theme-toggle {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--text); }
+.version-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+.main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+.page-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.page-headline {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.page-sub {
+  color: var(--text2);
+  font-size: 13px;
+  margin-bottom: 36px;
+}
+
+/* ============================================================
+   STEP SECTIONS
+   ============================================================ */
+.step {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius2);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.step.open .step-header { border-bottom-color: var(--border); }
+.step-num {
+  width: 24px; height: 24px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: bold;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step.done .step-num { background: var(--green); }
+.step-title {
+  font-weight: 600;
+  font-size: 14px;
+  flex: 1;
+}
+.step-subtitle { font-size: 12px; color: var(--text2); }
+.step-chevron {
+  color: var(--text3);
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+.step.open .step-chevron { transform: rotate(180deg); }
+.step-body { padding: 20px; display: none; }
+.step.open .step-body { display: block; }
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+.form-grid.full { grid-template-columns: 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field.span2 { grid-column: span 2; }
+label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+input[type="text"], input[type="date"], input[type="number"],
+input[type="password"], select, textarea {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--sans);
+  padding: 8px 10px;
+  width: 100%;
+  transition: border-color 0.15s;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79,158,248,0.12);
+}
+textarea { resize: vertical; min-height: 72px; }
+select option { background: var(--bg3); }
+input[type="color"] {
+  width: 36px; height: 32px;
+  padding: 2px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+}
+
+/* ============================================================
+   TRIP TYPE RADIO
+   ============================================================ */
+.trip-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 0; }
+.trip-type-option { display: none; }
+.trip-type-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 10px;
+  min-height: 90px;
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.trip-type-label:hover { border-color: var(--border2); }
+.trip-type-option:checked + .trip-type-label {
+  border-color: var(--accent);
+  background: rgba(79,158,248,0.07);
+}
+.trip-type-icon { font-size: 22px; }
+.trip-type-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.trip-type-desc { font-size: 10px; color: var(--text2); }
+
+/* ============================================================
+   SECTIONS CHECKBOXES
+   ============================================================ */
+.sections-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.subfilter-panel {
+  display: none;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.subfilter-panel.open { display: block; }
+.subfilter-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.subfilter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  font-size: 12px;
+}
+.subfilter-row label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.subfilter-row input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.subfilter-row select {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.section-check { display: none; }
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  min-height: 36px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.section-label:hover { border-color: var(--border2); }
+.section-check:checked + .section-label {
+  border-color: var(--green);
+  background: rgba(62,207,142,0.07);
+  color: var(--green);
+}
+.section-icon { font-size: 14px; }
+
+/* ============================================================
+   LEGS BUILDER
+   ============================================================ */
+.legs-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.leg-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.leg-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.leg-order {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.leg-card-title { font-size: 12px; font-weight: 600; flex: 1; color: var(--text2); }
+.btn-remove-leg {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.btn-remove-leg:hover { color: var(--red); background: rgba(224,85,85,0.1); }
+.leg-grid { display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 10px; align-items: end; }
+.leg-grid .field:nth-child(1) { min-width: 140px; }
+.schedule-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 8px 0;
+  white-space: nowrap;
+}
+.schedule-toggle input { cursor: pointer; }
+
+.btn-add-leg {
+  background: none;
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 10px;
+  width: 100%;
+  transition: all 0.15s;
+  text-align: center;
+}
+.btn-add-leg:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+.section-label-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  margin-top: 20px;
+}
+.section-label-text:first-child { margin-top: 0; }
+
+/* ============================================================
+   FOCUS TAGS
+   ============================================================ */
+.focus-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.focus-check { display: none; }
+.focus-tag {
+  padding: 5px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.focus-tag:hover { border-color: var(--border2); }
+.focus-check:checked + .focus-tag {
+  border-color: var(--accent2);
+  background: rgba(123,196,226,0.12);
+  color: var(--accent2);
+}
+
+/* ============================================================
+   API KEY
+   ============================================================ */
+.apikey-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+.apikey-note {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.apikey-note::before { content: "🔒"; }
+
+/* ============================================================
+   COST ESTIMATE BOX
+   ============================================================ */
+.cost-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.cost-box-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.cost-table { width: 100%; border-collapse: collapse; }
+.cost-table td {
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--text2);
+}
+.cost-table td:last-child { text-align: right; font-family: var(--mono); color: var(--text); }
+.cost-table tr.total td {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 4px;
+  color: var(--text);
+  font-weight: 700;
+}
+.cost-range {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--accent);
+}
+.cost-range-secondary {
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text2);
+  margin-left: 6px;
+}
+.currency-toggle {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  width: fit-content;
+}
+.currency-btn {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.currency-btn.active { background: var(--accent); color: #fff; }
+
+/* ============================================================
+   GENERATE BUTTON + PROGRESS
+   ============================================================ */
+.generate-section { margin-top: 0; }
+.btn-generate {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+  font-family: var(--sans);
+}
+.btn-generate:hover:not(:disabled) {
+  background: var(--accent2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(79,158,248,0.3);
+}
+.btn-generate:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.progress-area { display: none; margin-top: 16px; }
+.progress-area.visible { display: block; }
+.progress-steps { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text3);
+  transition: color 0.2s;
+}
+.progress-step.active { color: var(--text); }
+.progress-step.done { color: var(--green); }
+.progress-step.error { color: var(--red); }
+.step-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border2);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.progress-step.active .step-dot { background: var(--accent); animation: pulse 1s infinite; }
+.progress-step.done .step-dot { background: var(--green); }
+.progress-step.error .step-dot { background: var(--red); }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.progress-bar-wrap {
+  background: var(--bg3);
+  border-radius: 4px;
+  height: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-log {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  max-height: 100px;
+  overflow-y: auto;
+  line-height: 1.8;
+}
+
+/* ============================================================
+   OUTPUT / RESULT
+   ============================================================ */
+.result-area { display: none; margin-top: 20px; }
+.result-area.visible { display: block; }
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.result-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.result-actions { display: flex; gap: 8px; }
+.btn-secondary {
+  padding: 7px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--sans);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary {
+  padding: 7px 14px;
+  background: var(--green);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--sans);
+}
+.btn-primary:hover { opacity: 0.85; }
+.json-preview {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  max-height: 320px;
+  overflow-y: auto;
+  white-space: pre;
+  line-height: 1.7;
+}
+.error-box {
+  background: rgba(224,85,85,0.08);
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  color: var(--red);
+  font-size: 12px;
+  margin-top: 12px;
+  display: none;
+}
+.error-box.visible { display: block; }
+
+/* ============================================================
+   INFO BANNER
+   ============================================================ */
+.info-banner {
+  background: rgba(79,158,248,0.07);
+  border: 1px solid rgba(79,158,248,0.25);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 14px;
+  line-height: 1.6;
+}
+.info-banner strong { color: var(--accent); }
+
+
+/* ============================================================
+   JOURNEY BUILDER
+   ============================================================ */
+.journey-direction-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.dir-tab {
+  padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 2px solid var(--border); background: var(--bg3);
+  color: var(--text2); transition: all .15s; font-family: var(--sans);
+}
+.dir-tab.active { border-color: var(--accent); background: rgba(79,158,248,.1); color: var(--accent); }
+.journey-panel { display: none; }
+.journey-panel.active { display: block; }
+.segments-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.segment-card {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.segment-card-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.segment-order {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  padding: 2px 7px;
+}
+.segment-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+}
+.segment-grid-wide {
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-top: 8px;
+}
+.btn-remove-seg {
+  background: none; border: none; color: var(--text3); cursor: pointer;
+  font-size: 14px; padding: 2px 6px; border-radius: 4px; margin-left: auto;
+  transition: all .15s;
+}
+.btn-remove-seg:hover { color: var(--red); background: rgba(224,85,85,.1); }
+.btn-add-segment {
+  background: none; border: 2px dashed var(--border2); border-radius: var(--radius);
+  color: var(--text2); cursor: pointer; font-size: 12px; padding: 8px;
+  width: 100%; transition: all .15s; text-align: center; font-family: var(--sans);
+}
+.btn-add-segment:hover { border-color: var(--accent); color: var(--accent); }
+.journey-summary {
+  font-size: 11px; color: var(--text2); margin-top: 8px; padding: 8px 10px;
+  background: rgba(79,158,248,.05); border: 1px solid rgba(79,158,248,.15);
+  border-radius: var(--radius); font-family: var(--mono);
+}
+.cal-style-selector { display: flex; gap: 8px; }
+.cal-style-opt { display: none; }
+.cal-style-label {
+  display: block; padding: 10px 20px; border-radius: var(--radius); cursor: pointer;
+  border: 2px solid var(--border); background: var(--bg3); font-size: 13px;
+  font-weight: 600; color: var(--text2); transition: all .15s; text-align: center;
+  min-width: 120px;
+}
+.cal-style-label .cal-style-desc { font-size: 10px; font-weight: 400; display: block; margin-top: 3px; color: var(--text3); }
+.cal-style-opt:checked + .cal-style-label {
+  border-color: var(--accent); background: rgba(79,158,248,.08); color: var(--accent);
+}
+
+
+/* ============================================================
+   DATA SOURCES (Phase 3)
+   ============================================================ */
+.source-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.source-tab-btn {
+  padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 2px solid var(--border); background: var(--bg3);
+  color: var(--text2); transition: all .15s; font-family: var(--sans);
+}
+.source-tab-btn.active { border-color: var(--accent); background: rgba(79,158,248,.1); color: var(--accent); }
+.source-panel { display: none; }
+.source-panel.active { display: block; }
+
+.url-row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px; }
+.url-row .field { flex: 1; }
+.btn-add-url {
+  padding: 8px 14px; background: var(--accent); color: white; border: none;
+  border-radius: var(--radius); font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: var(--sans); white-space: nowrap; height: 34px;
+}
+.btn-add-url:hover { opacity: .85; }
+.url-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.url-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 12px;
+}
+.url-item-icon { font-size: 14px; flex-shrink: 0; }
+.url-item-label { font-weight: 600; color: var(--text); min-width: 80px; }
+.url-item-href { flex: 1; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 11px; }
+.btn-remove-url {
+  background: none; border: none; color: var(--text3); cursor: pointer;
+  font-size: 13px; padding: 2px 5px; border-radius: 4px; flex-shrink: 0;
+}
+.btn-remove-url:hover { color: var(--red); background: rgba(224,85,85,.1); }
+
+.pdf-drop-zone {
+  border: 2px dashed var(--border2); border-radius: var(--radius); padding: 24px;
+  text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 8px;
+}
+.pdf-drop-zone:hover, .pdf-drop-zone.dragover {
+  border-color: var(--accent); background: rgba(79,158,248,.05);
+}
+.pdf-drop-icon { font-size: 28px; margin-bottom: 8px; }
+.pdf-drop-text { font-size: 12px; color: var(--text2); }
+.pdf-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.pdf-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 12px;
+}
+.pdf-item-name { flex: 1; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdf-item-size { font-size: 11px; color: var(--text3); font-family: var(--mono); flex-shrink: 0; }
+.pdf-item-pages { font-size: 11px; color: var(--accent); flex-shrink: 0; }
+
+.source-extract-preview {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; margin-top: 10px; font-size: 12px; line-height: 1.6;
+  max-height: 200px; overflow-y: auto;
+}
+.source-preview-item {
+  display: flex; align-items: flex-start; gap: 8px; padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.source-preview-item:last-child { border-bottom: none; }
+.source-preview-type {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+}
+.spt-restaurant { background: rgba(62,207,142,.15); color: var(--green); }
+.spt-excursion  { background: rgba(79,158,248,.15); color: var(--accent); }
+.spt-logistics  { background: rgba(240,192,96,.15);  color: var(--yellow); }
+.spt-museum     { background: rgba(224,85,85,.15);   color: var(--red); }
+.source-preview-name { flex: 1; color: var(--text); font-weight: 500; }
+.source-preview-src  { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.source-extract-status {
+  display: flex; align-items: center; gap: 8px; padding: 8px 0;
+  font-size: 12px; color: var(--text2);
+}
+.source-extract-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--border2); flex-shrink: 0;
+}
+.source-extract-dot.loading { background: var(--accent); animation: pulse 1s infinite; }
+.source-extract-dot.done    { background: var(--green); }
+.source-extract-dot.error   { background: var(--red); }
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid.three { grid-template-columns: 1fr; }
+  .form-grid .field.span2 { grid-column: span 1; }
+  .trip-type-grid { grid-template-columns: 1fr; }
+  .sections-grid { grid-template-columns: repeat(2, 1fr); }
+  .leg-grid { grid-template-columns: 1fr 1fr; }
+  .apikey-row { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   HELP MODAL
+   ============================================================ */
+.help-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 500;
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 20px; overflow-y: auto;
+}
+.help-overlay.open { display: flex; }
+.help-modal {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius2);
+  padding: 32px; width: 100%; max-width: 680px; margin: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,.4);
+}
+.help-close {
+  float: right; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text2); cursor: pointer;
+  padding: 4px 12px; font-size: 13px; font-family: var(--sans);
+}
+.help-close:hover { border-color: var(--accent); color: var(--accent); }
+.help-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.help-version { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 24px; }
+.help-section { margin-bottom: 24px; }
+.help-section-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--accent); margin-bottom: 10px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+.help-step {
+  display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start;
+}
+.help-step-num {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 11px; font-weight: 700; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.help-step-body { flex: 1; }
+.help-step-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.help-step-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.help-tip {
+  background: rgba(79,158,248,.07); border: 1px solid rgba(79,158,248,.2);
+  border-radius: var(--radius); padding: 10px 14px; font-size: 12px;
+  color: var(--text2); line-height: 1.6; margin-bottom: 8px;
+}
+.help-tip strong { color: var(--accent); }
+.help-shortcut-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+}
+.help-shortcut {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 12px; font-size: 12px;
+}
+.help-shortcut code {
+  font-family: var(--mono); font-size: 11px; background: var(--bg2);
+  padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">travel<span>planner</span>.gen <span style="color:var(--text3)">/ generator</span></div>
+  <div class="header-right">
+    <span class="version-badge">v2</span>
+    <button class="theme-toggle" onclick="toggleHelpModal()">? Guida</button>
+    <button class="theme-toggle" onclick="toggleTheme()">☀ light</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="page-title">Phase 2 — Generator v10</div>
+  <div class="page-headline">Create your travel planner</div>
+  <div class="page-sub">Enter your trip, transport and preferences. The AI generates a JSON file following schema v1.1.</div>
+
+  <!-- ========================================================
+       GUIDA — Come si usa
+  ========================================================= -->
+  <div class="step" id="step-guide" style="border-color:rgba(79,158,248,.3);margin-bottom:20px">
+    <div class="step-header" onclick="toggleStep('step-guide')" style="background:rgba(79,158,248,.06)">
+      <div class="step-num" style="background:var(--text3)">?</div>
+      <div>
+        <div class="step-title">How to use — Quick guide</div>
+        <div class="step-subtitle">Schema v1.1 · Generator v10 · Planner v7</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px">📋 Flusso di lavoro</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.9">
+            <div><span style="color:var(--accent);font-weight:700">0.</span> Add A/R transport (optional but recommended)</div>
+            <div><span style="color:var(--accent);font-weight:700">1.</span> Fill in destination, dates, trip type, legs</div>
+            <div><span style="color:var(--accent);font-weight:700">2.</span> Choose calendar style and AI preferences</div>
+            <div><span style="color:var(--accent);font-weight:700">3.</span> Enter your Anthropic API key and generate</div>
+            <div><span style="color:var(--accent);font-weight:700">4.</span> Download the JSON and load it into <strong>planner_template_v7.html</strong></div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:10px">🗓️ Stili calendario</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.9">
+            <div><strong style="color:var(--text)">Concise</strong> — testo libero per slot. Veloce, meno token.</div>
+            <div><strong style="color:var(--text)">Structured</strong> — orari + attivita per ogni slot. Bilanciato.</div>
+            <div><strong style="color:var(--text)">Detailed</strong> — orari + descrizioni + link prenotazione. Max dettaglio, piu token e costo.</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--yellow);margin-bottom:10px">✈️ Trasporti (Step 0)</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.9">
+            <div>Add flights or trains <strong>from home to destination</strong>.</div>
+            <div>Add a segment for each leg (e.g. Bologna→Rome + Rome→Tunis for a connection).</div>
+            <div>I days con trasporti diventano automaticamente <code style="color:var(--accent)">type:transfer</code> nel calendario.</div>
+            <div>Se non hai ancora prenotato: lascia vuoto.</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:10px">🔑 Anthropic API Key</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.9">
+            <div>Serve un account su <strong>console.anthropic.com</strong> (separato da Claude.ai).</div>
+            <div>Ricarica credito minimo $5 nella sezione Billing.</div>
+            <div>Create an API Key in the API Keys section.</div>
+            <div>The key (sk-ant-...) is never saved — session only.</div>
+            <div style="margin-top:6px;color:var(--text3)">Typical cost per trip: $0.05–0.30 depending on detail level.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.2);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.7">
+        <strong style="color:var(--green)">Tip:</strong> Per il primo test usa <strong>Concise</strong> + <strong>Essenziale</strong> su una citta singola con 3 days. Costo ~$0.05. Poi scala a dettaglio completo quando sei soddisfatto del flusso.
+        <br>The generated JSON is compatible with <strong>planner_template_v7.html</strong>. Drag it into the planner drop zone to view it.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       STEP 0 — JOURNEYS (A/R transport)
+  ========================================================= -->
+  <div class="step open" id="step0">
+    <div class="step-header" onclick="toggleStep('step0')">
+      <div class="step-num" id="step0-num">0</div>
+      <div>
+        <div class="step-title">Transport A/R</div>
+        <div class="step-subtitle">Flights, trains, bus — outbound and return from home</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <div class="info-banner" style="margin-bottom:14px">
+        Add transport <strong>from home to destination</strong> (and return).
+        Days with transport automatically become days of type <code>transfer</code> nel calendario.
+        You can add multiple segments for connecting flights or train+flight combinations.
+      </div>
+
+      <!-- Direction tabs -->
+      <div class="journey-direction-tabs">
+        <button class="dir-tab active" id="dtab-out" onclick="switchJourneyTab('outbound')">✈️ Outbound</button>
+        <button class="dir-tab" id="dtab-ret" onclick="switchJourneyTab('return')">🏠 Return</button>
+      </div>
+
+      <!-- OUTBOUND -->
+      <div class="journey-panel active" id="jpanel-outbound">
+        <div class="section-label-text">Outbound segments <span id="out-date-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
+        <div class="segments-list" id="segs-outbound"></div>
+        <button class="btn-add-segment" onclick="addSegment('outbound')">+ Add segment</button>
+        <div class="journey-summary" id="sum-outbound"></div>
+      </div>
+
+      <!-- RETURN -->
+      <div class="journey-panel" id="jpanel-return">
+        <div class="section-label-text">Return segments <span id="ret-date-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
+        <div class="segments-list" id="segs-return"></div>
+        <button class="btn-add-segment" onclick="addSegment('return')">+ Add segment</button>
+        <div class="journey-summary" id="sum-return"></div>
+      </div>
+
+      <div class="info-banner" style="margin-top:12px">
+        <strong>Optional in v2</strong> — If you haven't booked transport yet, leave empty.
+        The JSON will include a <code>journeys:[]</code> empty section you can fill in later.
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================
+       STEP 1 — TRIP SETUP
+  ========================================================= -->
+  <div class="step open" id="step1">
+    <div class="step-header" onclick="toggleStep('step1')">
+      <div class="step-num" id="step1-num">1</div>
+      <div>
+        <div class="step-title">Trip details</div>
+        <div class="step-subtitle">Destination, dates, trip type, legs</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <!-- Basic info -->
+      <div class="section-label-text">General info</div>
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Trip title</label>
+          <input type="text" id="trip-title" placeholder="e.g. Ladakh Tour 2026" oninput="updateCostEstimate()">
+        </div>
+        <div class="field">
+          <label>Start date</label>
+          <input type="date" id="trip-start" onchange="updateCostEstimate()">
+        </div>
+        <div class="field">
+          <label>End date</label>
+          <input type="date" id="trip-end" onchange="updateCostEstimate()">
+        </div>
+        <div class="field">
+          <label>Departure base</label>
+          <input type="text" id="trip-home" placeholder="e.g. Milan, IT">
+        </div>
+        <div class="field">
+          <label>Arrival base <span style="color:var(--text3);font-weight:400">(if different)</span></label>
+          <input type="text" id="trip-home-dest" placeholder="e.g. Bologna (return)">
+        </div>
+        <div class="field">
+          <label>Main currency</label>
+          <select id="trip-currency">
+            <option value="EUR">EUR — Euro</option>
+            <option value="USD">USD — Dollar</option>
+            <option value="GBP">GBP — Pound</option>
+            <option value="INR">INR — Indian Rupee</option>
+            <option value="JPY">JPY — Yen</option>
+            <option value="THB">THB — Baht</option>
+            <option value="MAD">MAD — Moroccan Dirham</option>
+            <option value="TND">TND — Tunisian Dinar</option>
+            <option value="TRY">TRY — Turkish Lira</option>
+            <option value="OTHER">Other...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Output language</label>
+          <select id="trip-lang">
+            <option value="it">Italiano</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Trip type -->
+      <div class="section-label-text">Trip type</div>
+      <div class="trip-type-grid">
+        <div>
+          <input type="radio" name="trip-type" id="type-single" value="single_city" class="trip-type-option" checked onchange="onTripTypeChange()">
+          <label for="type-single" class="trip-type-label">
+            <span class="trip-type-icon">🏙️</span>
+            <span class="trip-type-name">Single city</span>
+            <span class="trip-type-desc">One destination</span>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="trip-type" id="type-multi" value="multi_city" class="trip-type-option" onchange="onTripTypeChange()">
+          <label for="type-multi" class="trip-type-label">
+            <span class="trip-type-icon">🗺️</span>
+            <span class="trip-type-name">Multi-city</span>
+            <span class="trip-type-desc">Multiple cities, day trips</span>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="trip-type" id="type-tour" value="tour" class="trip-type-option" onchange="onTripTypeChange()">
+          <label for="type-tour" class="trip-type-label">
+            <span class="trip-type-icon">🧭</span>
+            <span class="trip-type-name">Tour / Itinerary</span>
+            <span class="trip-type-desc">Sequential legs</span>
+          </label>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Legs builder -->
+      <div class="section-label-text">Legs <span id="legs-count-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)">(1)</span></div>
+      <div class="legs-container" id="legs-container"></div>
+      <button class="btn-add-leg" id="btn-add-leg" onclick="addLeg()" style="display:none">+ Add leg</button>
+
+      <hr class="divider">
+
+      <!-- Sections -->
+      <div class="section-label-text">Sections to include</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Click a section to expand and pick sub-filters. More sub-filters selected = more precise but more expensive.</div>
+      <div class="sections-grid" id="sections-grid">
+        <div><input type="checkbox" class="section-check" id="sec-calendar" value="calendar" checked><label for="sec-calendar" class="section-label"><span class="section-icon">📅</span> Calendar</label></div>
+        <div>
+          <input type="checkbox" class="section-check" id="sec-logistics" value="logistics" checked onchange="toggleSubFilter('logistics')">
+          <label for="sec-logistics" class="section-label"><span class="section-icon">📋</span> Logistics</label>
+        </div>
+        <div>
+          <input type="checkbox" class="section-check" id="sec-restaurants" value="restaurants" checked onchange="toggleSubFilter('restaurants')">
+          <label for="sec-restaurants" class="section-label"><span class="section-icon">🍽️</span> Restaurants</label>
+        </div>
+        <div>
+          <input type="checkbox" class="section-check" id="sec-excursions" value="excursions" checked onchange="toggleSubFilter('excursions')">
+          <label for="sec-excursions" class="section-label"><span class="section-icon">🥾</span> Excursions</label>
+        </div>
+        <div>
+          <input type="checkbox" class="section-check" id="sec-attractions" value="attractions" checked onchange="toggleSubFilter('attractions')">
+          <label for="sec-attractions" class="section-label"><span class="section-icon">🏛️</span> Attractions</label>
+        </div>
+        <div>
+          <input type="checkbox" class="section-check" id="sec-accommodation" value="accommodation" checked onchange="toggleSubFilter('accommodation')">
+          <label for="sec-accommodation" class="section-label"><span class="section-icon">🏨</span> Accommodation</label>
+        </div>
+        <div><input type="checkbox" class="section-check" id="sec-map" value="map" checked><label for="sec-map" class="section-label"><span class="section-icon">🗺️</span> Map</label></div>
+        <div><input type="checkbox" class="section-check" id="sec-parks" value="parks" checked><label for="sec-parks" class="section-label"><span class="section-icon">🌳</span> Parks</label></div>
+        <div>
+          <input type="checkbox" class="section-check" id="sec-events" value="events" checked onchange="toggleSubFilter('events')">
+          <label for="sec-events" class="section-label"><span class="section-icon">🎭</span> Events</label>
+        </div>
+        <div><input type="checkbox" class="section-check" id="sec-zones" value="zones" checked><label for="sec-zones" class="section-label"><span class="section-icon">📍</span> Areas</label></div>
+        <div><input type="checkbox" class="section-check" id="sec-notes" value="notes" checked><label for="sec-notes" class="section-label"><span class="section-icon">📝</span> Notes</label></div>
+      </div>
+
+      <!-- Sub-filter panels (shown/hidden by toggleSubFilter) -->
+      <div id="subfilter-restaurants" class="subfilter-panel">
+        <div class="subfilter-title">🍽️ Restaurants — sub-categories</div>
+        <div class="subfilter-row">
+          <label><input type="checkbox" class="sf-restaurants" value="local" checked> Local / traditional</label>
+          <label><input type="checkbox" class="sf-restaurants" value="street_food" checked> Street food</label>
+          <label><input type="checkbox" class="sf-restaurants" value="fine_dining"> Fine dining</label>
+          <label><input type="checkbox" class="sf-restaurants" value="vegetarian"> Vegetarian / vegan</label>
+          <label><input type="checkbox" class="sf-restaurants" value="seafood"> Seafood</label>
+          <label><input type="checkbox" class="sf-restaurants" value="cafe"> Cafés / bakeries</label>
+        </div>
+        <div class="subfilter-row" style="margin-top:8px">
+          <label style="display:flex;align-items:center;gap:6px">Min rating: <select id="sf-rest-rating" style="width:auto;padding:3px 6px"><option value="0">Any</option><option value="3.5">3.5+</option><option value="4" selected>4.0+</option><option value="4.5">4.5+</option></select></label>
+          <label style="display:flex;align-items:center;gap:6px">Price: <select id="sf-rest-price" style="width:auto;padding:3px 6px"><option value="any" selected>Any</option><option value="budget">€ Budget</option><option value="mid">€€ Mid-range</option><option value="high">€€€ High-end</option></select></label>
+        </div>
+      </div>
+
+      <div id="subfilter-excursions" class="subfilter-panel">
+        <div class="subfilter-title">🥾 Excursions — sub-categories</div>
+        <div class="subfilter-row">
+          <label><input type="checkbox" class="sf-excursions" value="nature" checked> Nature / scenic</label>
+          <label><input type="checkbox" class="sf-excursions" value="trekking" checked> Trekking / hiking</label>
+          <label><input type="checkbox" class="sf-excursions" value="adventure"> Adventure sports</label>
+          <label><input type="checkbox" class="sf-excursions" value="water"> Water activities</label>
+          <label><input type="checkbox" class="sf-excursions" value="religious"> Religious / spiritual</label>
+          <label><input type="checkbox" class="sf-excursions" value="wildlife"> Wildlife</label>
+        </div>
+        <div class="subfilter-row" style="margin-top:8px">
+          <label style="display:flex;align-items:center;gap:6px">Duration: <select id="sf-exc-duration" style="width:auto;padding:3px 6px"><option value="any" selected>Any</option><option value="day">Day trip only</option><option value="overnight">Overnight+</option></select></label>
+          <label style="display:flex;align-items:center;gap:6px">Difficulty: <select id="sf-exc-difficulty" style="width:auto;padding:3px 6px"><option value="any" selected>Any</option><option value="easy">Easy only</option><option value="easy_medium">Easy + Medium</option></select></label>
+        </div>
+      </div>
+
+      <div id="subfilter-attractions" class="subfilter-panel">
+        <div class="subfilter-title">🏛️ Attractions — sub-categories</div>
+        <div class="subfilter-row">
+          <label><input type="checkbox" class="sf-attractions" value="museum" checked> Museums</label>
+          <label><input type="checkbox" class="sf-attractions" value="church" checked> Churches / temples</label>
+          <label><input type="checkbox" class="sf-attractions" value="monument" checked> Monuments</label>
+          <label><input type="checkbox" class="sf-attractions" value="square" checked> Squares / plazas</label>
+          <label><input type="checkbox" class="sf-attractions" value="viewpoint"> Viewpoints</label>
+          <label><input type="checkbox" class="sf-attractions" value="market"> Markets</label>
+          <label><input type="checkbox" class="sf-attractions" value="neighborhood"> Neighborhoods</label>
+        </div>
+      </div>
+
+      <div id="subfilter-logistics" class="subfilter-panel">
+        <div class="subfilter-title">📋 Logistics — sub-categories</div>
+        <div class="subfilter-row">
+          <label><input type="checkbox" class="sf-logistics" value="metro" checked> Metro / subway</label>
+          <label><input type="checkbox" class="sf-logistics" value="bus" checked> Bus</label>
+          <label><input type="checkbox" class="sf-logistics" value="taxi" checked> Taxi / ride-share</label>
+          <label><input type="checkbox" class="sf-logistics" value="sim"> SIM / internet</label>
+          <label><input type="checkbox" class="sf-logistics" value="money" checked> Money / ATMs</label>
+          <label><input type="checkbox" class="sf-logistics" value="health" checked> Health</label>
+          <label><input type="checkbox" class="sf-logistics" value="safety"> Safety</label>
+          <label><input type="checkbox" class="sf-logistics" value="permits"> Permits</label>
+        </div>
+      </div>
+
+      <div id="subfilter-accommodation" class="subfilter-panel">
+        <div class="subfilter-title">🏨 Accommodation — sub-categories</div>
+        <div class="subfilter-row">
+          <label><input type="checkbox" class="sf-accommodation" value="hotel" checked> Hotels</label>
+          <label><input type="checkbox" class="sf-accommodation" value="hostel"> Hostels</label>
+          <label><input type="checkbox" class="sf-accommodation" value="apartment" checked> Apartments / B&B</label>
+          <label><input type="checkbox" class="sf-accommodation" value="boutique"> Boutique / local</label>
+        </div>
+        <div class="subfilter-row" style="margin-top:8px">
+          <label style="display:flex;align-items:center;gap:6px">Min rating: <select id="sf-acc-rating" style="width:auto;padding:3px 6px"><option value="0" selected>Any</option><option value="3.5">3.5+</option><option value="4">4.0+</option><option value="4.5">4.5+</option></select></label>
+          <label style="display:flex;align-items:center;gap:6px">Price: <select id="sf-acc-price" style="width:auto;padding:3px 6px"><option value="any" selected>Any</option><option value="budget">€ Budget</option><option value="mid">€€ Mid-range</option><option value="high">€€€ High-end</option></select></label>
+        </div>
+      </div>
+
+      <div id="subfilter-events" class="subfilter-panel">
+        <div class="subfilter-title">🎭 Events — sub-categories</div>
+        <div class="subfilter-row">
+          <label><input type="checkbox" class="sf-events" value="festival" checked> Festivals / fairs</label>
+          <label><input type="checkbox" class="sf-events" value="concert"> Concerts / music</label>
+          <label><input type="checkbox" class="sf-events" value="market_event"> Markets / seasonal events</label>
+          <label><input type="checkbox" class="sf-events" value="sport"> Sports events</label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       STEP 2 — PREFERENCES
+  ========================================================= -->
+  <div class="step" id="step2">
+    <div class="step-header" onclick="toggleStep('step2')">
+      <div class="step-num" id="step2-num">2</div>
+      <div>
+        <div class="step-title">Preferences & style</div>
+        <div class="step-subtitle">Focus, detail level, special notes</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <div class="section-label-text">Detail level</div>
+      <div class="form-grid three">
+        <div class="field">
+          <label>Detail level</label>
+          <select id="detail-level" onchange="updateCostEstimate()">
+            <option value="essenziale">Essential — fast, fewer tokens</option>
+            <option value="completo" selected>Complete — balanced</option>
+            <option value="esperto">Expert — maximum detail</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Budget range</label>
+          <select id="budget-level">
+            <option value="budget">Budget / Backpacker</option>
+            <option value="medio" selected>Mid-range</option>
+            <option value="comfort">Comfort</option>
+            <option value="luxury">Luxury</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Travellers</label>
+          <input type="text" id="travelers" placeholder="e.g. 2 adults, 1 child aged 8">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label-text">Calendar style <span style="color:var(--text3);font-weight:400">— how much detail in daily slots</span></div>
+      <div class="cal-style-selector">
+        <div>
+          <input type="radio" name="cal-style" id="cs-sint" value="sintetico" class="cal-style-opt" onchange="updateCostEstimate()">
+          <label for="cs-sint" class="cal-style-label">
+            Concise
+            <span class="cal-style-desc">Free text per slot</span>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="cal-style" id="cs-stru" value="strutturato" class="cal-style-opt" checked onchange="updateCostEstimate()">
+          <label for="cs-stru" class="cal-style-label">
+            Structured
+            <span class="cal-style-desc">Times + activities</span>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="cal-style" id="cs-dett" value="dettagliato" class="cal-style-opt" onchange="updateCostEstimate()">
+          <label for="cs-dett" class="cal-style-label">
+            Detailed
+            <span class="cal-style-desc">Times + descriptions + links</span>
+          </label>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label-text">Trip focus <span style="color:var(--text3);font-weight:400">(choose one or more)</span></div>
+      <div class="focus-grid">
+        <div><input type="checkbox" class="focus-check" id="f-cultura" value="cultura"><label for="f-cultura" class="focus-tag">🏛️ Culture</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-natura" value="natura"><label for="f-natura" class="focus-tag">🌿 Nature</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-avventura" value="avventura"><label for="f-avventura" class="focus-tag">🧗 Adventure</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-gastronomia" value="gastronomia"><label for="f-gastronomia" class="focus-tag">🍷 Gastronomy</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-relax" value="relax"><label for="f-relax" class="focus-tag">🏖️ Relax</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-spirituale" value="spirituale/religioso"><label for="f-spirituale" class="focus-tag">🕌 Spiritual</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-storia" value="storia"><label for="f-storia" class="focus-tag">📜 History</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-fotografia" value="fotografia"><label for="f-fotografia" class="focus-tag">📷 Photography</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-shopping" value="shopping"><label for="f-shopping" class="focus-tag">🛍️ Shopping</label></div>
+        <div><input type="checkbox" class="focus-check" id="f-bambini" value="bambini"><label for="f-bambini" class="focus-tag">👶 Family-friendly</label></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label-text">Notes speciali for the AI</div>
+      <div class="form-grid full">
+        <div class="field">
+          <label>Free instructions</label>
+          <textarea id="special-notes" placeholder="e.g. We are vegetarian. Avoid touristy spots. We prefer challenging hikes. No chain hotels, only boutique or local guesthouses."></textarea>
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <strong>AI only (v2)</strong> — Data is generated by the AI (source: <code>ai_generated</code>). Manually entered transport uses source: <code>user_manual</code>. PDF and URL ingestion arrives in Phase 3. Always verify critical info (prices, hours, bookings) before travelling.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       STEP 3 — GENERATION MODE
+  ========================================================= -->
+  <div class="step open" id="step3">
+    <div class="step-header" onclick="toggleStep('step3')">
+      <div class="step-num" id="step3-num">3</div>
+      <div>
+        <div class="step-title">Generation mode</div>
+        <div class="step-subtitle">Choose how to create your planner: free, AI, or combined</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <!-- MODE SELECTOR -->
+      <div class="section-label-text">Mode</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+
+        <div>
+          <input type="radio" name="gen-mode" id="mode-free" value="free" class="trip-type-option" onchange="onModeChange()" checked>
+          <label for="mode-free" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
+            <span class="trip-type-icon">📂</span>
+            <div>
+              <div class="trip-type-name">Local files only <span style="color:var(--green);font-size:10px;font-weight:700">FREE</span></div>
+              <div class="trip-type-desc">Upload PDF or CSV — no API key needed. The planner reads your files and structures the data.</div>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <input type="radio" name="gen-mode" id="mode-ai" value="ai" class="trip-type-option" onchange="onModeChange()">
+          <label for="mode-ai" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
+            <span class="trip-type-icon">🤖</span>
+            <div>
+              <div class="trip-type-name">AI only</div>
+              <div class="trip-type-desc">The AI generates everything from scratch. Requires Anthropic API key. Cost ~$0.05–0.30.</div>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <input type="radio" name="gen-mode" id="mode-ai-files" value="ai_files" class="trip-type-option" onchange="onModeChange()">
+          <label for="mode-ai-files" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
+            <span class="trip-type-icon">🤖📄</span>
+            <div>
+              <div class="trip-type-name">AI + local files <span style="color:var(--accent);font-size:10px;font-weight:700">RECOMMENDED</span></div>
+              <div class="trip-type-desc">Your PDF/CSV files become context for the AI. More accurate output, "high" confidence, fewer wasted tokens.</div>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <input type="radio" name="gen-mode" id="mode-ai-url" value="ai_url" class="trip-type-option" onchange="onModeChange()">
+          <label for="mode-ai-url" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
+            <span class="trip-type-icon">🤖🌐</span>
+            <div>
+              <div class="trip-type-name">AI + web URLs</div>
+              <div class="trip-type-desc">The AI reads websites you specify (TripAdvisor, official site...) and extracts real data from them.</div>
+            </div>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- FILE UPLOAD SECTION (visible for modes: free, ai_files) -->
+      <div id="section-files" style="display:none">
+        <hr class="divider">
+        <div class="section-label-text">Files to upload <span id="upload-count-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">PDF, CSV/TSV, TXT or MD — travel guides, spreadsheets, or free text from any AI</div>
+
+        <div class="pdf-drop-zone" id="unified-drop-zone" onclick="document.getElementById('unified-file-input').click()">
+          <div class="pdf-drop-icon">＋</div>
+          <div class="pdf-drop-text">
+            Drop files here or click to browse<br>
+            <span style="font-size:11px;color:var(--text3)">PDF (max 10MB, selectable text only) · CSV · TSV · TXT · MD</span>
+          </div>
+        </div>
+        <input type="file" id="unified-file-input" accept=".pdf,.csv,.tsv,.txt,.md" multiple style="display:none" onchange="handleAnyFileUpload(event)">
+        <div class="pdf-list" id="upload-list"></div>
+
+        <!-- Parse preview (free mode only) -->
+        <div id="free-parse-preview" style="display:none;margin-top:12px">
+          <div class="section-label-text">Preview extracted data</div>
+          <div class="source-extract-status" id="free-parse-status">
+            <div class="source-extract-dot" id="free-parse-dot"></div>
+            <span id="free-parse-msg">Carica un file per vedere l'anteprima</span>
+          </div>
+          <div class="source-extract-preview" id="free-parse-content"></div>
+        </div>
+      </div>
+
+      <!-- URL SECTION (visible for mode: ai_url) -->
+      <div id="section-urls" style="display:none">
+        <hr class="divider">
+        <div class="section-label-text">URL da analizzare <span id="url-count-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)">(0)</span></div>
+        <div class="url-row">
+          <div class="field">
+            <label>Tipo sorgente</label>
+            <select id="url-type-select">
+              <option value="guida">🗺️ Guida turistica</option>
+              <option value="ristoranti">🍽️ Lista ristoranti</option>
+              <option value="escursioni">🥾 Excursions / attrazioni</option>
+              <option value="logistica">📋 Info pratiche / logistica</option>
+              <option value="sito_ufficiale">🏛️ Sito ufficiale destinazione</option>
+              <option value="generale">📰 Articolo / blog</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Etichetta (nome fonte)</label>
+            <input type="text" id="url-label-input" placeholder="es. TripAdvisor Venezia">
+          </div>
+        </div>
+        <div class="url-row">
+          <div class="field">
+            <label>URL</label>
+            <input type="text" id="url-href-input" placeholder="https://..." oninput="updateUrlAddBtn()">
+          </div>
+          <button class="btn-add-url" id="btn-add-url" onclick="addUrl()" disabled>+ Add</button>
+        </div>
+        <div class="url-list" id="url-list"></div>
+        <div class="info-banner" style="margin-top:10px;font-size:11px">
+          Suggested URLs: official museum website, TripAdvisor city page, travel blog, Wikipedia destination page. Avoid URLs requiring login.
+        </div>
+      </div>
+
+      <!-- API KEY (hidden for free mode) -->
+      <div id="section-apikey">
+        <hr class="divider">
+        <div class="section-label-text">Codice di Accesso</div>
+        <div class="apikey-row">
+          <div class="field">
+            <label>Codice accesso</label>
+            <input type="text" id="access-code" placeholder="es. AMICI2026" oninput="onAccessCodeInput()" style="text-transform:uppercase">
+          </div>
+        </div>
+        <div class="apikey-note">Inserisci il codice ricevuto per generare il tuo planner. Non hai un codice? <a href="index.html#prezzi" style="color:var(--accent)">Acquista qui</a>.</div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Cost estimate (hidden for free mode) -->
+      <div id="section-cost">
+        <div class="section-label-text">
+          Estimated API cost
+          <span style="float:right">
+            <div class="currency-toggle">
+              <button class="currency-btn active" id="btn-usd" onclick="setCurrency('USD')">USD</button>
+              <button class="currency-btn" id="btn-eur" onclick="setCurrency('EUR')">EUR</button>
+            </div>
+          </span>
+        </div>
+        <div class="cost-box">
+          <table class="cost-table" id="cost-table">
+            <tr><td>Model</td><td>claude-sonnet-4-6</td></tr>
+            <tr><td>Estimated API calls</td><td id="est-calls">—</td></tr>
+            <tr><td>Estimated input tokens</td><td id="est-input-tokens">—</td></tr>
+            <tr><td>Estimated output tokens</td><td id="est-output-tokens">—</td></tr>
+            <tr class="total">
+              <td>Estimated cost</td>
+              <td>
+                <span class="cost-range" id="cost-min-display">—</span>
+                <span class="cost-range-secondary" id="cost-range-display"></span>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Generate button -->
+      <div class="generate-section">
+        <button class="btn-generate" id="btn-generate" onclick="startGeneration()">
+          🚀 Generate planner
+        </button>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);user-select:none">
+            <input type="checkbox" id="mock-mode-toggle" onchange="onMockModeToggle()" style="width:14px;height:14px;accent-color:var(--accent)">
+            <span>🧪 Mock mode — bypass API, dummy data (€0, instant)</span>
+          </label>
+        </div>
+        <div class="error-box" id="error-box"></div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-area" id="progress-area">
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="progress-steps" id="progress-steps"></div>
+        <div class="progress-log" id="progress-log"></div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-area" id="result-area">
+        <div class="result-header">
+          <div class="result-title">✓ Planner generato con successo</div>
+          <div class="result-actions">
+            <button class="btn-secondary" onclick="copyJson()">📋 Copy JSON</button>
+            <button class="btn-primary" id="btn-download" onclick="downloadJson()">⬇ Download JSON</button>
+          </div>
+        </div>
+        <div class="json-preview" id="json-preview"></div>
+        <div class="info-banner" style="margin-top:12px">
+          <strong>Next step:</strong> Load this JSON into <code>planner_template_v7.html</code> to view your interactive planner.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+var legs = [];
+var legCounter = 0;
+var generatedJson = null;
+var displayCurrency = "USD";
+var EUR_USD = 0.92;
+var isLightTheme = false;
+var mockMode = false;
+
+/* Journey builder state */
+var journeys = {
+  outbound: { id: "j_outbound", label: "Outbound", direction: "outbound", date: "", segments: [] },
+  ret:      { id: "j_return",   label: "Ritorno", direction: "return",   date: "", segments: [] }
+};
+var segCounters = { outbound: 0, ret: 0 };
+var currentJourneyTab = "outbound";
+
+/* Source ingestion state (Phase 3) */
+var sourceUrls = [];   /* [{label, href, type}] */
+var sourcePdfs = [];   /* [{name, size, b64, label}] */
+var sourceTexts = [];  /* [{name, size, text, label}] TXT/MD free-text sources */
+var extractedItems = []; /* items extracted from sources before main generation */
+
+var SEG_TYPES = [
+  ["flight","Volo","✈️"],["train","Treno","🚆"],["bus","Bus","🚌"],
+  ["car","Auto","🚗"],["ferry","Traghetto","⛴️"],["taxi","Taxi","🚕"],
+  ["transfer","Transfer","🚐"],["walk","To piedi","🚶"],["other","Altro","🚀"]
+];
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  var today = new Date();
+  var nextMonth = new Date(today);
+  nextMonth.setMonth(today.getMonth() + 2);
+  var twoWeeks = new Date(nextMonth);
+  twoWeeks.setDate(nextMonth.getDate() + 14);
+  document.getElementById("trip-start").value = formatDate(nextMonth);
+  document.getElementById("trip-end").value = formatDate(twoWeeks);
+  addLeg();
+  onTripTypeChange();
+  updateCostEstimate();
+  openStep("step3");
+  openStep("step1");
+  /* Open sub-filter panels for sections checked by default */
+  ["restaurants","excursions","attractions","logistics","accommodation","events"].forEach(function(s) {
+    toggleSubFilter(s);
+  });
+  /* Init drag-drop and mode UI after DOM ready */
+  setTimeout(function() {
+    initUnifiedDrop();
+    onModeChange();
+  }, 100);
+}
+
+function formatDate(d) {
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+}
+function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function toggleTheme() {
+  isLightTheme = !isLightTheme;
+  document.body.classList.toggle("light", isLightTheme);
+  document.querySelector(".theme-toggle").textContent = isLightTheme ? "🌙 dark" : "☀ light";
+}
+
+/* ============================================================
+   JOURNEY BUILDER
+   ============================================================ */
+function switchJourneyTab(dir) {
+  currentJourneyTab = dir;
+  document.getElementById("dtab-out").classList.toggle("active", dir === "outbound");
+  document.getElementById("dtab-ret").classList.toggle("active", dir === "return");
+  document.getElementById("jpanel-outbound").classList.toggle("active", dir === "outbound");
+  document.getElementById("jpanel-return").classList.toggle("active", dir === "return");
+}
+
+function addSegment(dir) {
+  var key = dir === "return" ? "ret" : "outbound";
+  segCounters[key]++;
+  var id = "seg_" + dir.substring(0, 3) + "_" + segCounters[key];
+  var homeBase = (document.getElementById("trip-home") || {}).value || "";
+  var firstLeg = legs.length > 0 ? legs[0].name : "";
+  journeys[key].segments.push({
+    id: id, order: journeys[key].segments.length + 1,
+    type: "flight", from: dir === "outbound" ? homeBase : firstLeg,
+    to: dir === "outbound" ? firstLeg : homeBase,
+    from_code: "", to_code: "", date: "",
+    departure: "", arrival: "", duration_min: null,
+    carrier: "", number: "", class: "Economy",
+    booking_ref: "", booking_url: "", price: null, price_currency: "EUR",
+    confirmed: false, notes: "", source: "user_manual", confidence: "high"
+  });
+  renderSegments(key);
+  updateJourneySummary(key);
+  updateCostEstimate();
+}
+
+function removeSegment(dir, idx) {
+  var key = dir === "return" ? "ret" : "outbound";
+  journeys[key].segments.splice(idx, 1);
+  journeys[key].segments.forEach(function(s, i) { s.order = i + 1; });
+  renderSegments(key);
+  updateJourneySummary(key);
+  updateCostEstimate();
+}
+
+function updateSegField(dir, idx, field, val) {
+  var key = dir === "return" ? "ret" : "outbound";
+  journeys[key].segments[idx][field] = val;
+  if (field === "price") journeys[key].segments[idx][field] = val ? parseFloat(val) : null;
+  if (field === "duration_min") journeys[key].segments[idx][field] = val ? parseInt(val) : null;
+  updateJourneySummary(key);
+}
+
+function renderSegments(key) {
+  var dir = key === "ret" ? "return" : "outbound";
+  var container = document.getElementById("segs-" + dir);
+  if (!container) return;
+  var segs = journeys[key].segments;
+  if (!segs.length) { container.innerHTML = ""; return; }
+  var html = "";
+  segs.forEach(function(seg, i) {
+    var d = JSON.stringify(dir);
+    var typeOpts = SEG_TYPES.map(function(t) {
+      return "<option value=" + JSON.stringify(t[0]) + (seg.type === t[0] ? " selected" : "") + ">" + t[2] + " " + t[1] + "</option>";
+    }).join("");
+    var currOpts = ["EUR","USD","GBP","INR","JPY","OTHER"].map(function(c) {
+      return "<option" + (seg.price_currency === c ? " selected" : "") + ">" + c + "</option>";
+    }).join("");
+    html += "<div class='segment-card'>";
+    html += "<div class='segment-card-header'>";
+    html += "<span class='segment-order'>Segmento " + (i + 1) + "</span>";
+    html += "<button class='btn-remove-seg' onclick='removeSegment(" + d + "," + i + ")'>✕</button>";
+    html += "</div>";
+    html += "<div class='segment-grid'>";
+    html += "<div class='field'><label>Tipo</label><select onchange='updateSegField(" + d + "," + i + ",\"type\",this.value)'>" + typeOpts + "</select></div>";
+    html += "<div class='field'><label>From</label><input type='text' value='" + esc(seg.from) + "' placeholder='es. Bologna BLQ' oninput='updateSegField(" + d + "," + i + ",\"from\",this.value)'></div>";
+    html += "<div class='field'><label>To</label><input type='text' value='" + esc(seg.to) + "' placeholder='e.g. Rome FCO' oninput='updateSegField(" + d + "," + i + ",\"to\",this.value)'></div>";
+    html += "</div>";
+    html += "<div class='segment-grid-wide'>";
+    html += "<div class='field'><label>Fromta</label><input type='date' value='" + (seg.date || "") + "' onchange='updateSegField(" + d + "," + i + ",\"date\",this.value)'></div>";
+    html += "<div class='field'><label>Partenza</label><input type='text' value='" + (seg.departure || "") + "' placeholder='07:10' oninput='updateSegField(" + d + "," + i + ",\"departure\",this.value)'></div>";
+    html += "<div class='field'><label>Arrivo</label><input type='text' value='" + (seg.arrival || "") + "' placeholder='07:58' oninput='updateSegField(" + d + "," + i + ",\"arrival\",this.value)'></div>";
+    html += "<div class='field'><label>Duration (min)</label><input type='number' value='" + (seg.duration_min || "") + "' placeholder='48' oninput='updateSegField(" + d + "," + i + ",\"duration_min\",this.value)'></div>";
+    html += "</div>";
+    html += "<div class='segment-grid-wide' style='margin-top:8px'>";
+    html += "<div class='field'><label>Vettore</label><input type='text' value='" + esc(seg.carrier) + "' placeholder='es. Trenitalia' oninput='updateSegField(" + d + "," + i + ",\"carrier\",this.value)'></div>";
+    html += "<div class='field'><label>Numero</label><input type='text' value='" + esc(seg.number) + "' placeholder='FR 9611' oninput='updateSegField(" + d + "," + i + ",\"number\",this.value)'></div>";
+    html += "<div class='field'><label>Prezzo</label><input type='number' step='0.01' value='" + (seg.price || "") + "' placeholder='19.90' oninput='updateSegField(" + d + "," + i + ",\"price\",this.value)'></div>";
+    html += "<div class='field'><label>Valuta</label><select onchange='updateSegField(" + d + "," + i + ",\"price_currency\",this.value)'>" + currOpts + "</select></div>";
+    html += "</div>";
+    html += "<div class='form-grid' style='margin-top:8px'>";
+    html += "<div class='field'><label>Ref / PNR</label><input type='text' value='" + esc(seg.booking_ref) + "' placeholder='ToBC123' oninput='updateSegField(" + d + "," + i + ",\"booking_ref\",this.value)'></div>";
+    html += "<div class='field'><label>URL</label><input type='text' value='" + esc(seg.booking_url) + "' placeholder='https://...' oninput='updateSegField(" + d + "," + i + ",\"booking_url\",this.value)'></div>";
+    html += "</div></div>";
+  });
+  container.innerHTML = html;
+}
+
+function updateJourneySummary(key) {
+  var dir = key === "ret" ? "return" : "outbound";
+  var el = document.getElementById("sum-" + dir);
+  if (!el) return;
+  var segs = journeys[key].segments;
+  if (!segs.length) { el.textContent = ""; return; }
+  var total = 0;
+  var currency = "EUR";
+  var parts = segs.map(function(s) {
+    if (s.price) { total += s.price; currency = s.price_currency || "EUR"; }
+    return (s.departure || "?") + " " + (s.from || "?") + " → " + (s.to || "?") + (s.arrival ? " " + s.arrival : "");
+  });
+  el.textContent = parts.join("  |  ") + (total > 0 ? "  —  Total: " + total.toFixed(2) + " " + currency : "");
+}
+
+function esc(s) { return s ? String(s).replace(/'/g, "&#39;").replace(/"/g, "&quot;") : ""; }
+
+function buildJourneysPayload() {
+  var result = [];
+  ["outbound", "ret"].forEach(function(key) {
+    var j = journeys[key];
+    var dir = key === "ret" ? "return" : "outbound";
+    if (!j.segments.length) return;
+    var date = j.segments[0].date || "";
+    result.push({
+      id: j.id, label: j.label, direction: dir, date: date,
+      segments: j.segments.map(function(s) { return Object.assign({}, s); })
+    });
+  });
+  return result;
+}
+
+/* ============================================================
+   SOURCE INGESTION — Phase 3
+   ============================================================ */
+
+/* --- Tab switching --- */
+function switchSourceTab(tab) {
+  document.getElementById("stab-url").classList.toggle("active", tab === "url");
+  document.getElementById("stab-pdf").classList.toggle("active", tab === "pdf");
+  document.getElementById("spanel-url").classList.toggle("active", tab === "url");
+  document.getElementById("spanel-pdf").classList.toggle("active", tab === "pdf");
+}
+
+/* --- URL management --- */
+function updateUrlAddBtn() {
+  var val = (document.getElementById("url-href-input") || {}).value || "";
+  var btn = document.getElementById("btn-add-url");
+  if (btn) btn.disabled = val.trim().length < 8 || val.indexOf(".") === -1;
+}
+
+function addUrl() {
+  var href  = (document.getElementById("url-href-input") || {}).value.trim();
+  var label = (document.getElementById("url-label-input") || {}).value.trim();
+  var type  = (document.getElementById("url-type-select") || {}).value || "generale";
+  if (!href) return;
+  if (href.indexOf("http") !== 0) href = "https://" + href;
+  if (!label) {
+    try { label = new URL(href).hostname.replace("www.", ""); } catch(e) { label = href; }
+  }
+  sourceUrls.push({ label: label, href: href, type: type });
+  document.getElementById("url-href-input").value = "";
+  document.getElementById("url-label-input").value = "";
+  renderUrlList();
+  updateCostEstimate();
+}
+
+function removeUrl(idx) {
+  sourceUrls.splice(idx, 1);
+  renderUrlList();
+  updateCostEstimate();
+}
+
+function renderUrlList() {
+  var el = document.getElementById("url-list");
+  if (!el) return;
+  var badge = document.getElementById("url-count-badge");
+  if (badge) badge.textContent = "(" + sourceUrls.length + ")";
+  var typeIcons = { guida:"🗺️", ristoranti:"🍽️", escursioni:"🥾", logistica:"📋", generale:"📰", sito_ufficiale:"🏛️" };
+  el.innerHTML = sourceUrls.map(function(u, i) {
+    return "<div class='url-item'>" +
+      "<span class='url-item-icon'>" + (typeIcons[u.type] || "🌐") + "</span>" +
+      "<span class='url-item-label'>" + escHtmlSrc(u.label) + "</span>" +
+      "<span class='url-item-href'>" + escHtmlSrc(u.href) + "</span>" +
+      "<button class='btn-remove-url' onclick='removeUrl(" + i + ")'>✕</button>" +
+      "</div>";
+  }).join("");
+}
+
+/* --- Unified file management --- */
+var unifiedDropInit = false;
+
+function initUnifiedDrop() {
+  var dz = document.getElementById("unified-drop-zone");
+  if (!dz || unifiedDropInit) return;
+  unifiedDropInit = true;
+  dz.addEventListener("dragover", function(e) { e.preventDefault(); dz.classList.add("dragover"); });
+  dz.addEventListener("dragleave", function() { dz.classList.remove("dragover"); });
+  dz.addEventListener("drop", function(e) {
+    e.preventDefault(); dz.classList.remove("dragover");
+    handleAnyFileUpload({ target: { files: e.dataTransfer.files, value: "" } });
+  });
+}
+
+function escHtmlSrc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ============================================================
+   SOURCE EXTRACTION — API calls before main generation
+   ============================================================ */
+async function extractFromSources(apiKey, ctx) {
+  var allItems = [];
+  var hasSources = sourceUrls.length > 0 || sourcePdfs.length > 0;
+  if (!hasSources) return allItems;
+
+  /* These DOM elements may not exist in all UI modes — guard every access */
+  var areaEl  = document.getElementById("source-extract-area");
+  var dot     = document.getElementById("source-extract-dot");
+  var msg     = document.getElementById("source-extract-msg");
+  var preview = document.getElementById("source-extract-preview");
+  if (areaEl) areaEl.style.display = "block";
+  if (dot) dot.className = "source-extract-dot loading";
+
+  var destination = ctx.legs && ctx.legs.length > 0 ? ctx.legs.map(function(l) { return l.name; }).join(", ") : ctx.title;
+
+  /* Extract from each URL */
+  for (var i = 0; i < sourceUrls.length; i++) {
+    var src = sourceUrls[i];
+    if (msg) msg.textContent = "Analyzing URL " + (i+1) + "/" + sourceUrls.length + ": " + src.label + "...";
+    try {
+      var items = await extractFromUrl(apiKey, src, destination, ctx.lang);
+      items.forEach(function(item) { item._source_label = src.label; item._source_href = src.href; });
+      allItems = allItems.concat(items);
+      log("  \u2713 URL \"" + src.label + "\": " + items.length + " elementi estratti");
+    } catch(err) {
+      log("  \u26a0 URL \"" + src.label + "\": " + err.message);
+    }
+  }
+
+  /* Extract from each PDF */
+  for (var j = 0; j < sourcePdfs.length; j++) {
+    var pdf = sourcePdfs[j];
+    if (msg) msg.textContent = "Analyzing PDF " + (j+1) + "/" + sourcePdfs.length + ": " + pdf.name + "...";
+    try {
+      var pdfItems = await extractFromPdf(apiKey, pdf, destination, ctx.lang);
+      pdfItems.forEach(function(item) { item._source_label = pdf.label || pdf.name; item._source_href = ""; });
+      allItems = allItems.concat(pdfItems);
+      log("  \u2713 PDF \"" + pdf.name + "\": " + pdfItems.length + " elementi estratti");
+    } catch(err) {
+      log("  \u26a0 PDF \"" + pdf.name + "\": " + err.message);
+    }
+  }
+
+  /* Show preview */
+  if (allItems.length > 0) {
+    if (dot) dot.className = "source-extract-dot done";
+    if (msg) msg.textContent = allItems.length + " elementi totali estratti dalle sorgenti";
+    var typeIcons = { restaurant:"🍽️", excursion:"🥾", museum:"🏛️", logistics:"📋", park:"🌳", zone:"📍", event:"🎭" };
+    if (preview) preview.innerHTML = allItems.slice(0, 20).map(function(item) {
+      var icon = typeIcons[item.type] || "📌";
+      return "<div class='source-preview-item'>" +
+        "<span class='source-preview-type spt-" + item.type + "'>" + item.type + "</span>" +
+        "<div>" +
+        "<div class='source-preview-name'>" + icon + " " + escHtmlSrc(item.name || item.title) + "</div>" +
+        "<div class='source-preview-src'>da: " + escHtmlSrc(item._source_label) + "</div>" +
+        "</div></div>";
+    }).join("") + (allItems.length > 20 ? "<div style='padding:5px 0;color:var(--text3);font-size:11px'>...e altri " + (allItems.length-20) + " elementi</div>" : "");
+  } else {
+    if (dot) dot.className = "source-extract-dot error";
+    if (msg) msg.textContent = "Nessun elemento estratto dalle sorgenti";
+  }
+
+  extractedItems = allItems;
+  return allItems;
+}
+
+async function extractFromUrl(apiKey, src, destination, lang) {
+  var sys = "Sei un estrattore di dati di viaggio. Rispondi SOLO con JSON valido, niente testo extra.";
+  var user = "Analyze this URL and extract useful information for a trip to " + destination + ".\n" +
+    "URL: " + src.href + "\nTipo sorgente dichiarato: " + src.type + "\n\n" +
+    "Restituisci un JSON con questa struttura:\n" +
+    '{ "items": [ { "type": "restaurant|excursion|museum|logistics|park|zone|event", "name": "...", "description": "...", "lat": null, "lng": null, "notes": "...", "url": "...", "website": "...", "phone": "..." } ] }\n\n' +
+    "Estrai SOLO elementi rilevanti per la destinazione " + destination + ". " +
+    "Per i ristoranti includi categoria e prezzo se presenti. " +
+    "IMPORTANTE sui link e contatti: se nella pagina sorgente sono presenti un sito web ufficiale, un numero di telefono, un indirizzo email o un link diretto per un luogo/attivita specifica, riportali ESATTAMENTE come scritti nei campi 'website' e 'phone'. Non inventare o indovinare URL: se non sono presenti nel testo, lascia il campo vuoto. Nel campo 'url' metti sempre " + src.href + " (la pagina sorgente), mentre 'website' e 'phone' sono per i contatti specifici del singolo luogo se presenti nel testo. " +
+    "Output language: " + lang + ". " +
+    "Se non riesci ad accedere all'URL o non ci sono dati utili, restituisci { \"items\": [] }.";
+
+  var result = await callApiWithTool(apiKey, sys, user, 3000);
+  return (result && result.items) ? result.items : [];
+}
+
+async function extractFromPdf(apiKey, pdf, destination, lang) {
+  var sys = "Sei un estrattore di dati di viaggio da documenti. Rispondi SOLO con JSON valido, niente testo extra.";
+  var user = "Analyze this PDF and extract all useful information for a trip to " + destination + ".\n" +
+    "Estrai: ristoranti, attrazioni, escursioni, musei, info logistiche/pratiche.\n\n" +
+    "Restituisci:\n" +
+    '{ "items": [ { "type": "restaurant|excursion|museum|logistics|park|zone|event", "name": "...", "description": "...", "lat": null, "lng": null, "notes": "...", "url": "", "website": "...", "phone": "..." } ] }\n\n' +
+    "IMPORTANTE sui link e contatti: se nel testo del PDF sono presenti siti web, numeri di telefono o indirizzi email specifici per un luogo, riportali ESATTAMENTE come scritti nei campi 'website' e 'phone'. Non inventare o indovinare contatti: se non sono presenti nel testo del documento, lascia i campi vuoti. " +
+    "Output language: " + lang + ".";
+
+  var resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 3000,
+      system: sys,
+      messages: [{
+        role: "user",
+        content: [
+          { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdf.b64 } },
+          { type: "text", text: user }
+        ]
+      }]
+    })
+  });
+
+  if (!resp.ok) {
+    var err = await resp.json().catch(function() { return {}; });
+    throw new Error((err.error && err.error.message) ? err.error.message : "HTTP " + resp.status);
+  }
+  var data = await resp.json();
+  var text = (data.content || []).map(function(b) { return b.text || ""; }).join("").trim();
+  text = text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+  try {
+    var parsed = JSON.parse(text);
+    return parsed.items || [];
+  } catch(e) {
+    return [];
+  }
+}
+
+async function callApiWithTool(apiKey, sys, user, maxTokens) {
+  /* Uses web_search tool to fetch URL content */
+  var resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: maxTokens || 3000,
+      system: sys,
+      tools: [{ type: "web_search_20250305", name: "web_search" }],
+      messages: [{ role: "user", content: user }]
+    })
+  });
+
+  if (!resp.ok) {
+    var err = await resp.json().catch(function() { return {}; });
+    throw new Error((err.error && err.error.message) ? err.error.message : "HTTP " + resp.status);
+  }
+  var data = await resp.json();
+  /* Collect all text blocks from the response (may include tool_use results) */
+  var text = (data.content || []).filter(function(b) { return b.type === "text"; })
+    .map(function(b) { return b.text || ""; }).join("").trim();
+  text = text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    var start = text.indexOf("{");
+    var end = text.lastIndexOf("}");
+    if (start !== -1 && end > start) {
+      try { return JSON.parse(text.slice(start, end+1)); } catch(e2) {}
+    }
+    return { items: [] };
+  }
+}
+
+/* ============================================================
+   MERGE EXTRACTED ITEMS INTO baseJson
+   ============================================================ */
+function mergeExtractedIntoJson(baseJson, items, ctx) {
+  if (!items || !items.length) return;
+  var legId = (baseJson.legs && baseJson.legs.length > 0) ? baseJson.legs[0].id : "leg1";
+
+  /* For multi-leg trips, assign to leg by matching destination name */
+  items.forEach(function(item) {
+    var targetLegIdx = 0;
+    if (baseJson.legs && baseJson.legs.length > 1) {
+      /* Try to find leg by name similarity — fallback to first leg */
+      for (var i = 0; i < baseJson.legs.length; i++) {
+        var legName = (baseJson.legs[i].name || "").toLowerCase();
+        var itemSrc = (item._source_label || "").toLowerCase();
+        if (itemSrc.indexOf(legName) !== -1 || legName.indexOf(itemSrc) !== -1) {
+          targetLegIdx = i;
+          break;
+        }
+      }
+    }
+    var leg = baseJson.legs[targetLegIdx];
+    if (!leg) return;
+    var legIdLocal = leg.id;
+
+    var sourceLabel = item._source_label || "Sorgente utente";
+    var sourceHref  = item._source_href  || "";
+    var baseId = (item.type || "item") + "_" + legIdLocal + "_src_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+
+    if (item.type === "hotel") {
+      /* Map hotel to accommodation option */
+      if (!leg.accommodation) leg.accommodation = { confirmed_item: null, booking_ref: null, booking_url: null, check_in: null, check_out: null, options: [] };
+      if (!leg.accommodation.options) leg.accommodation.options = [];
+      leg.accommodation.options.push({
+        id: "acc_" + baseId,
+        name: item.name || "Hotel",
+        lat: item.lat || null, lng: item.lng || null,
+        price_night: null, price_currency: ctx.currency || "EUR",
+        rating: null, url: item.url || sourceHref,
+        source: "pdf_extract", source_label: sourceLabel,
+        confidence: "medium",
+        notes: item.description || item.notes || ""
+      });
+      return;
+    }
+    if (item.type === "restaurant") {
+      if (!leg.restaurants) leg.restaurants = [];
+      leg.restaurants.push({
+        id: "rest_" + baseId,
+        name: item.name || item.title || "Ristorante",
+        category: item.category || "locale",
+        lat: item.lat || null, lng: item.lng || null,
+        price_range: item.price || "",
+        must_try: "", hours: "",
+        source: "web_fetch", source_label: sourceLabel,
+        confidence: "medium", conflict: null,
+        notes: item.description || item.notes || "",
+        url: item.url || sourceHref
+      });
+    } else if (item.type === "excursion") {
+      if (!leg.excursions) leg.excursions = [];
+      leg.excursions.push({
+        id: "exc_" + baseId,
+        name: item.name || item.title || "Escursione",
+        type: "cultural", duration_hours: null, difficulty: "easy",
+        lat: item.lat || null, lng: item.lng || null,
+        permit_required: false, permit_notes: "",
+        best_time: "",
+        source: "web_fetch", source_label: sourceLabel,
+        confidence: "medium", conflict: null,
+        notes: item.description || item.notes || "",
+        url: item.url || sourceHref
+      });
+    } else if (item.type === "museum") {
+      if (!leg.museums) leg.museums = [];
+      leg.museums.push({
+        id: "mus_" + baseId,
+        name: item.name || item.title || "Museo",
+        lat: item.lat || null, lng: item.lng || null,
+        free: false, price_approx: item.price || "",
+        hours: item.hours || "",
+        source: "web_fetch", source_label: sourceLabel,
+        confidence: "medium", conflict: null,
+        notes: item.description || item.notes || "",
+        url: item.url || sourceHref
+      });
+    } else if (item.type === "logistics") {
+      if (!leg.logistics) leg.logistics = [];
+      leg.logistics.push({
+        id: "log_" + baseId,
+        category: item.category || "other",
+        title: item.name || item.title || "Info",
+        body: item.description || item.notes || "",
+        source: "web_fetch", source_label: sourceLabel,
+        confidence: "medium", conflict: null, notes: "",
+        url: item.url || sourceHref
+      });
+    } else if (item.type === "park") {
+      if (!leg.parks) leg.parks = [];
+      leg.parks.push({
+        id: "park_" + baseId,
+        name: item.name || item.title || "Parco",
+        lat: item.lat || null, lng: item.lng || null,
+        type: item.subtype || "parco",
+        source: "web_fetch", source_label: sourceLabel,
+        confidence: "medium",
+        notes: item.description || item.notes || "",
+        url: item.url || sourceHref
+      });
+    } else if (item.type === "zone") {
+      if (!leg.zones) leg.zones = [];
+      leg.zones.push({
+        id: "zone_" + baseId,
+        name: item.name || item.title || "Zona",
+        type: "neighborhood",
+        lat: item.lat || null, lng: item.lng || null,
+        description: item.description || item.notes || "",
+        source: "web_fetch", source_label: sourceLabel,
+        confidence: "medium"
+      });
+    } else if (item.type === "event") {
+      if (!leg.events) leg.events = [];
+      leg.events.push({
+        id: "evt_" + baseId,
+        name: item.name || item.title || "Evento",
+        date_from: null, date_to: null,
+        location: item.location || "",
+        lat: item.lat || null, lng: item.lng || null,
+        source: "web_fetch", source_label: sourceLabel,
+        confidence: "low",
+        notes: item.description || item.notes || "",
+        url: item.url || sourceHref
+      });
+    }
+  });
+}
+
+/* ============================================================
+   MODE SWITCHING
+   ============================================================ */
+/* ============================================================
+   SUB-FILTERS — expandable category panels per section
+   ============================================================ */
+function toggleSubFilter(section) {
+  var checkbox = document.getElementById("sec-" + section);
+  var panel = document.getElementById("subfilter-" + section);
+  if (!panel) return;
+  if (checkbox.checked) {
+    panel.classList.add("open");
+  } else {
+    panel.classList.remove("open");
+  }
+}
+
+function getSubFilters(section) {
+  var checked = [];
+  document.querySelectorAll(".sf-" + section + ":checked").forEach(function(el) { checked.push(el.value); });
+  return checked;
+}
+
+function getSubFilterExtra(section) {
+  /* Restituisce filtri extra (rating, prezzo, durata) per la sezione, se presenti nel DOM */
+  var extra = {};
+  if (section === "restaurants") {
+    extra.minRating = parseFloat((document.getElementById("sf-rest-rating") || {}).value || "0");
+    extra.priceRange = (document.getElementById("sf-rest-price") || {}).value || "any";
+  } else if (section === "accommodation") {
+    extra.minRating = parseFloat((document.getElementById("sf-acc-rating") || {}).value || "0");
+    extra.priceRange = (document.getElementById("sf-acc-price") || {}).value || "any";
+  } else if (section === "excursions") {
+    extra.duration = (document.getElementById("sf-exc-duration") || {}).value || "any";
+    extra.difficulty = (document.getElementById("sf-exc-difficulty") || {}).value || "any";
+  }
+  return extra;
+}
+
+function getGenMode() {
+  var el = document.querySelector("input[name='gen-mode']:checked");
+  return el ? el.value : "ai";
+}
+
+function onModeChange() {
+  var mode = getGenMode();
+  var isFree    = mode === "free";
+  var needFiles = mode === "free" || mode === "ai_files";
+  var needUrl   = mode === "ai_url";
+  var needApi   = mode !== "free";
+
+  document.getElementById("section-files").style.display  = needFiles ? "block" : "none";
+  document.getElementById("section-urls").style.display   = needUrl   ? "block" : "none";
+  document.getElementById("section-apikey").style.display = needApi   ? "block" : "none";
+  document.getElementById("section-cost").style.display   = needApi   ? "block" : "none";
+  document.getElementById("free-parse-preview").style.display = isFree && (sourcePdfs.length > 0 || sourceCsvs.length > 0) ? "block" : "none";
+
+  /* In free mode btn is always enabled if files loaded, else disabled */
+  updateGenerateBtn();
+  updateCostEstimate();
+}
+
+/* ============================================================
+   CSV STATE + UPLOAD
+   ============================================================ */
+var sourceCsvs = []; /* [{name, size, text, label}] */
+
+/* ============================================================
+   UNIFIED FILE UPLOAD — PDF, CSV/TSV, TXT/MD
+   ============================================================ */
+function handleAnyFileUpload(e) {
+  var files = Array.from(e.target.files);
+  files.forEach(function(file) {
+    var lower = file.name.toLowerCase();
+    if (lower.endsWith(".pdf")) {
+      if (file.size > 10 * 1024 * 1024) { alert(file.name + ": max 10MB"); return; }
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        var b64 = ev.target.result.split(",")[1];
+        sourcePdfs.push({ name: file.name, size: file.size, b64: b64, label: file.name.replace(".pdf","").replace(/[-_]/g," ") });
+        renderUploadList();
+        onModeChange();
+        if (getGenMode() === "free") parsePdfsLocally();
+      };
+      reader.readAsDataURL(file);
+    } else if (lower.endsWith(".csv") || lower.endsWith(".tsv")) {
+      var reader2 = new FileReader();
+      reader2.onload = function(ev) {
+        sourceCsvs.push({ name: file.name, size: file.size, text: ev.target.result, label: file.name.replace(/\.csv$|\.tsv$/i,"").replace(/[-_]/g," ") });
+        renderUploadList();
+        onModeChange();
+        if (getGenMode() === "free") parseCsvsLocally();
+      };
+      reader2.readAsText(file);
+    } else if (lower.endsWith(".txt") || lower.endsWith(".md")) {
+      var reader3 = new FileReader();
+      reader3.onload = function(ev) {
+        sourceTexts.push({ name: file.name, size: file.size, text: ev.target.result, label: file.name.replace(/\.txt$|\.md$/i,"").replace(/[-_]/g," ") });
+        renderUploadList();
+        onModeChange();
+      };
+      reader3.readAsText(file);
+    } else {
+      alert(file.name + ": unsupported format. Use PDF, CSV, TSV, TXT or MD.");
+    }
+  });
+  e.target.value = "";
+}
+
+function renderUploadList() {
+  var el = document.getElementById("upload-list");
+  if (!el) return;
+  var all = [];
+  sourcePdfs.forEach(function(f, i) { all.push({ icon: "📄", name: f.name, size: f.size, type: "pdf", idx: i }); });
+  sourceCsvs.forEach(function(f, i) { all.push({ icon: "📊", name: f.name, size: f.size, type: "csv", idx: i }); });
+  sourceTexts.forEach(function(f, i) { all.push({ icon: "📝", name: f.name, size: f.size, type: "txt", idx: i }); });
+  var badge = document.getElementById("upload-count-badge");
+  if (badge) badge.textContent = all.length ? "(" + all.length + ")" : "";
+  el.innerHTML = all.map(function(f) {
+    var sizeLabel = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1) + "MB" : Math.round(f.size/1024) + "KB";
+    return "<div class='pdf-item'>" +
+      "<span style='font-size:18px'>" + f.icon + "</span>" +
+      "<span class='pdf-item-name'>" + escHtmlSrc(f.name) + "</span>" +
+      "<span class='pdf-item-size'>" + sizeLabel + "</span>" +
+      "<button class='btn-remove-url' onclick='removeUploadedFile(\"" + f.type + "\"," + f.idx + ")'>✕</button>" +
+      "</div>";
+  }).join("");
+}
+
+function removeUploadedFile(type, idx) {
+  if (type === "pdf") sourcePdfs.splice(idx, 1);
+  else if (type === "csv") sourceCsvs.splice(idx, 1);
+  else if (type === "txt") sourceTexts.splice(idx, 1);
+  renderUploadList();
+  updateCostEstimate();
+}
+
+function parseCsvsLocally() {
+  /* Placeholder hook: parsing CSV locale già gestito da parseFreeMode altrove se presente */
+  if (typeof parseFreeModeSources === "function") parseFreeModeSources();
+}
+
+/* ============================================================
+   FREE MODE — CLIENT-SIDE PARSING (no API)
+   ============================================================ */
+function parsePdfsLocally() {
+  /* Uses pdf.js loaded from CDN to extract text, then heuristic parsing */
+  var dot = document.getElementById("free-parse-dot");
+  var msg = document.getElementById("free-parse-msg");
+  var preview = document.getElementById("free-parse-content");
+  if (!dot) return;
+  document.getElementById("free-parse-preview").style.display = "block";
+  dot.className = "source-extract-dot loading";
+  msg.textContent = "Lettura PDF in corso...";
+
+  /* Load pdf.js UMD (legacy) build — exposes window.pdfjsLib globally */
+  if (!window.pdfjsLib) {
+    msg.textContent = "Caricamento pdf.js...";
+    var script = document.createElement("script");
+    /* Use legacy UMD build, NOT .mjs module — modules don't set window.pdfjsLib */
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    script.onload = function() {
+      /* Set worker for pdf.js v3 */
+      if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        extractPdfTextAndParse(dot, msg, preview);
+      } else {
+        dot.className = "source-extract-dot error";
+        msg.textContent = "pdf.js non disponibile dopo il caricamento.";
+      }
+    };
+    script.onerror = function() {
+      dot.className = "source-extract-dot error";
+      msg.textContent = "Impossibile caricare pdf.js. Controlla la connessione.";
+    };
+    document.head.appendChild(script);
+  } else {
+    extractPdfTextAndParse(dot, msg, preview);
+  }
+}
+
+async function extractPdfTextAndParse(dot, msg, preview) {
+  var allExtracted = [];
+  for (var i = 0; i < sourcePdfs.length; i++) {
+    var pdf = sourcePdfs[i];
+    msg.textContent = "Lettura " + pdf.name + "...";
+    try {
+      var bytes = Uint8Array.from(atob(pdf.b64), function(c) { return c.charCodeAt(0); });
+      var pdfDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
+      var text = "";
+      var maxPages = Math.min(pdfDoc.numPages, 30);
+      msg.textContent = "Lettura " + pdf.name + " (" + pdfDoc.numPages + " pagine)...";
+      for (var p = 1; p <= maxPages; p++) {
+        var page = await pdfDoc.getPage(p);
+        var tc = await page.getTextContent();
+        /* Collect text with newlines between items that have significant Y gaps */
+        var lastY = null;
+        tc.items.forEach(function(item) {
+          if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+            text += "\n";
+          }
+          text += item.str;
+          if (item.str.trim()) lastY = item.transform[5];
+        });
+        text += "\n";
+      }
+      console.log("PDF text length:", text.length, "chars, first 300:", text.substring(0, 300));
+      msg.textContent = "Analyzing " + pdf.name + " (" + text.length + " chars)...";
+      var items = heuristicParse(text, pdf.label);
+      console.log("Items found:", items.length, items.slice(0,3));
+      allExtracted = allExtracted.concat(items);
+    } catch(err) {
+      console.error("PDF parse error:", err);
+      dot.className = "source-extract-dot error";
+      msg.textContent = "Errore lettura PDF: " + err.message;
+    }
+  }
+
+  /* Parse CSVs */
+  sourceCsvs.forEach(function(csv) {
+    var items = parseCsvFromText(csv.text, csv.label);
+    allExtracted = allExtracted.concat(items);
+  });
+
+  extractedItems = allExtracted;
+
+  if (allExtracted.length > 0) {
+    dot.className = "source-extract-dot done";
+    msg.textContent = allExtracted.length + " elementi trovati nei file";
+    var typeIcons = { restaurant:"🍽️", excursion:"🥾", museum:"🏛️", logistics:"📋", hotel:"🏨" };
+    preview.innerHTML = allExtracted.slice(0, 25).map(function(item) {
+      return "<div class='source-preview-item'>" +
+        "<span class='source-preview-type spt-" + (item.type || "excursion") + "'>" + (item.type || "item") + "</span>" +
+        "<div><div class='source-preview-name'>" + (typeIcons[item.type]||"📌") + " " + escHtmlSrc(item.name) + "</div>" +
+        "<div class='source-preview-src'>da: " + escHtmlSrc(item._source_label) + "</div></div></div>";
+    }).join("") + (allExtracted.length > 25 ? "<div style='padding:5px;color:var(--text3);font-size:11px'>...e altri " + (allExtracted.length-25) + "</div>" : "");
+  } else {
+    dot.className = "source-extract-dot error";
+    msg.textContent = "No structured data found. Try AI + file mode.";
+  }
+}
+
+function heuristicParse(text, sourceLabel) {
+  var items = [];
+  /* Split into lines, filter noise */
+  var lines = text.split(/[\n\r]+/).map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 6 && l.length < 300; });
+
+  /* Multilingual keywords (IT + EN + FR + ES + DE) */
+  var restKW   = /restaurant|ristorante|trattoria|osteria|pizzeria|bistro|cafe|caffe|taverna|brasserie|izakaya|trattoria|dining|eatery|tapas|sushi|noodle|bakery|pastry|dim\s?sum|tea\s?house/i;
+  var museumKW = /museum|museo|galleria|gallery|palace|palazzo|cathedral|basilica|church|chiesa|duomo|temple|shrine|fort|castle|ruins|monument|memorial|historic/i;
+  var hotelKW  = /hotel|hostel|guesthouse|guest\s?house|pensionne|pension|suites|apartments|resort|inn\b|b&b|bed\s*&?\s*break/i;
+  var excKW    = /tour|walk|excursion|escursione|trekking|hiking|cruise|market|park|garden|viewpoint|beach|island|waterfall|museum\s?tour/i;
+  var logKW    = /warning|caution|tip\b|advice|emergency|hospital|police|taxi|transport|bus|metro|subway|ferry|airport|money|atm|visa|passport|important|note\b|hours\b|opening/i;
+  var priceKW  = /\$\$\$|\$\$|\$|€€€|€€|€|P\d{2,}|\d+\s*(USD|EUR|PHP|GBP|peso|pesos)/i;
+
+  /* Price range extraction */
+  function extractPrice(line) {
+    var m = line.match(/\$\$\$|\$\$|\$|€€€|€€|€/);
+    return m ? m[0] : "";
+  }
+
+  /* Skip lines that are clearly map symbols or page numbers */
+  function isNoise(line) {
+    /* Lone symbols, numbers, very short */
+    if (/^[\d\s\.\,\#\£\¡\æ\á\ÿ\ú\û\ý\þ\ì\ï\Ü\í\Ø\ß\ò\ã\â\à]+$/.test(line)) return true;
+    if (line.length < 8) return true;
+    /* Map coordinate-like */
+    if (/^\d{1,3}\.\d+$/.test(line)) return true;
+    return false;
+  }
+
+  for (var i = 0; i < lines.length && items.length < 80; i++) {
+    var line = lines[i];
+    if (isNoise(line)) continue;
+    var next  = lines[i+1] || "";
+    var next2 = lines[i+2] || "";
+    var combined = line + " " + next + " " + next2;
+
+    /* Detect type and extract */
+    if (hotelKW.test(line) && !excKW.test(line)) {
+      /* Hotel/hostel card: usually "Name HOTEL $$" pattern */
+      var name = line.replace(hotelKW, "").replace(/\s+/g," ").trim() || line;
+      if (name.length < 3) name = line;
+      items.push({
+        type: "hotel",
+        name: name.substring(0, 80),
+        description: (next.length > 10 ? next : "") + (next2.length > 10 ? " " + next2 : ""),
+        notes: extractPrice(combined),
+        _source_label: sourceLabel
+      });
+    } else if (restKW.test(line)) {
+      var name = line.replace(restKW, "").replace(/\s+/g," ").trim() || line;
+      items.push({
+        type: "restaurant",
+        name: name.substring(0, 80),
+        description: next.length > 10 ? next : "",
+        notes: extractPrice(combined),
+        _source_label: sourceLabel
+      });
+    } else if (museumKW.test(line)) {
+      items.push({
+        type: "museum",
+        name: line.substring(0, 80),
+        description: next.length > 10 ? next : "",
+        notes: extractPrice(combined),
+        _source_label: sourceLabel
+      });
+    } else if (excKW.test(line)) {
+      items.push({
+        type: "excursion",
+        name: line.substring(0, 80),
+        description: next.length > 10 ? next : "",
+        notes: "",
+        _source_label: sourceLabel
+      });
+    } else if (logKW.test(line) && line.length > 20) {
+      items.push({
+        type: "logistics",
+        name: line.substring(0, 60),
+        description: combined.substring(0, 200),
+        _source_label: sourceLabel
+      });
+    }
+  }
+
+  /* Deduplicate by name similarity */
+  var seen = {};
+  return items.filter(function(item) {
+    var key = (item.name || "").toLowerCase().replace(/[^a-z]/g,"").substring(0,20);
+    if (seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
+}
+
+
+function parseCsvFromText(text, sourceLabel) {
+  /* Simple CSV parser — first row = headers, detect type columns */
+  var items = [];
+  var lines = text.split(/[\n\r]+/).filter(function(l) { return l.trim(); });
+  if (lines.length < 2) return items;
+  var sep = lines[0].indexOf(";") !== -1 ? ";" : ",";
+  var headers = lines[0].split(sep).map(function(h) { return h.trim().toLowerCase().replace(/["']/g,""); });
+  var nameIdx = headers.findIndex(function(h) { return /nome|name|titolo|title/.test(h); });
+  var typeIdx = headers.findIndex(function(h) { return /tipo|type|categoria|category/.test(h); });
+  var noteIdx = headers.findIndex(function(h) { return /note|desc|descrizione|notes/.test(h); });
+  var urlIdx  = headers.findIndex(function(h) { return /url|link|sito|web/.test(h); });
+  if (nameIdx === -1) nameIdx = 0;
+
+  for (var i = 1; i < lines.length && items.length < 100; i++) {
+    var cols = lines[i].split(sep).map(function(c) { return c.trim().replace(/^["'"]|["'"]$/g,""); });
+    var name = cols[nameIdx] || "";
+    if (!name) continue;
+    var type = typeIdx !== -1 ? (cols[typeIdx]||"").toLowerCase() : "excursion";
+    /* Normalize type */
+    if (/rest|ristor|food|cibo/.test(type)) type = "restaurant";
+    else if (/mus|gallery|galleria/.test(type)) type = "museum";
+    else if (/hotel|alberg|acc/.test(type)) type = "hotel";
+    else if (/log|info|trasport/.test(type)) type = "logistics";
+    else type = "excursion";
+
+    items.push({
+      type: type, name: name,
+      notes: noteIdx !== -1 ? (cols[noteIdx]||"") : "",
+      url: urlIdx !== -1 ? (cols[urlIdx]||"") : "",
+      _source_label: sourceLabel
+    });
+  }
+  return items;
+}
+
+/* ============================================================
+   STEP ACCORDION
+   ============================================================ */
+function toggleStep(id) {
+  var el = document.getElementById(id);
+  el.classList.toggle("open");
+}
+function openStep(id) {
+  document.getElementById(id).classList.add("open");
+}
+
+/* ============================================================
+   TRIP TYPE
+   ============================================================ */
+function onTripTypeChange() {
+  var type = document.querySelector("input[name='trip-type']:checked").value;
+  var addBtn = document.getElementById("btn-add-leg");
+  var isSingle = type === "single_city";
+  addBtn.style.display = isSingle ? "none" : "block";
+  if (isSingle && legs.length > 1) {
+    while (legs.length > 1) {
+      legs.pop();
+    }
+    renderLegs();
+  }
+  if (isSingle && legs.length === 0) addLeg();
+  var label = document.querySelector(".leg-card-title");
+  updateCostEstimate();
+}
+
+/* ============================================================
+   LEGS BUILDER
+   ============================================================ */
+var LEG_COLORS = ["#4f9ef8", "#3ecf8e", "#f0c060", "#e05555", "#a78bfa", "#f97316", "#ec4899", "#14b8a6"];
+
+function addLeg() {
+  var type = document.querySelector("input[name='trip-type']:checked").value;
+  if (type === "single_city" && legs.length >= 1) return;
+  legCounter++;
+  var color = LEG_COLORS[(legs.length) % LEG_COLORS.length];
+  legs.push({ id: "leg_" + legCounter, name: "", color: color, days: 7, mode: "fixed", dateFrom: "" });
+  renderLegs();
+  updateCostEstimate();
+}
+
+function removeLeg(idx) {
+  if (legs.length <= 1) return;
+  legs.splice(idx, 1);
+  renderLegs();
+  updateCostEstimate();
+}
+
+function updateLegField(idx, field, val) {
+  legs[idx][field] = val;
+  updateCostEstimate();
+  document.getElementById("legs-count-badge").textContent = "(" + legs.length + ")";
+}
+
+function renderLegs() {
+  var container = document.getElementById("legs-container");
+  var type = document.querySelector("input[name='trip-type']:checked").value;
+  var isSingle = type === "single_city";
+  var html = "";
+  for (var i = 0; i < legs.length; i++) {
+    var leg = legs[i];
+    var isFixed = leg.mode === "fixed";
+    html += "<div class='leg-card'>";
+    html += "<div class='leg-card-header'>";
+    html += "<span class='leg-order'>Leg " + (i + 1) + "</span>";
+    html += "<span class='leg-card-title' style='color:var(--text2)'>" + (leg.name || "—") + "</span>";
+    if (!isSingle && legs.length > 1) {
+      html += "<button class='btn-remove-leg' onclick='removeLeg(" + i + ")'>✕</button>";
+    }
+    html += "</div>";
+    html += "<div class='leg-grid'>";
+    html += "<div class='field'><label>" + (isSingle ? "Destination" : "Leg name") + "</label>";
+    html += "<input type='text' value='" + leg.name.replace(/'/g, "&#39;") + "' placeholder='e.g. Leh' oninput='updateLegField(" + i + ", \"name\", this.value)'></div>";
+    html += "<div class='field'><label>Days</label>";
+    html += "<input type='number' min='1' max='60' value='" + leg.days + "' style='width:70px' oninput='updateLegField(" + i + ", \"days\", parseInt(this.value)||1)'></div>";
+    html += "<div class='field'><label>Color</label>";
+    html += "<input type='color' value='" + leg.color + "' oninput='updateLegField(" + i + ", \"color\", this.value)'></div>";
+    html += "<div class='field'><label>Dates</label>";
+    html += "<select onchange='updateLegField(" + i + ", \"mode\", this.value)'>";
+    html += "<option value='fixed'" + (isFixed ? " selected" : "") + ">Fixed</option>";
+    html += "<option value='flexible'" + (!isFixed ? " selected" : "") + ">Flexible</option>";
+    html += "</select></div>";
+    html += "<div class='field'><label>Start date</label>";
+    html += "<input type='date' value='" + (leg.dateFrom || "") + "' oninput='updateLegField(" + i + ", \"dateFrom\", this.value)'></div>";
+    html += "</div>";
+    html += "</div>";
+  }
+  container.innerHTML = html;
+  document.getElementById("legs-count-badge").textContent = "(" + legs.length + ")";
+}
+
+/* ============================================================
+   COST ESTIMATE
+   ============================================================ */
+var PRICE_INPUT_PER_M  = 3.0;
+var PRICE_OUTPUT_PER_M = 15.0;
+
+function getEnabledSections() {
+  var checks = document.querySelectorAll(".section-check:checked");
+  return checks.length;
+}
+
+function getDetailMultiplier() {
+  var level = document.getElementById("detail-level") ? document.getElementById("detail-level").value : "completo";
+  if (level === "essenziale") return 0.6;
+  if (level === "esperto") return 1.6;
+  return 1.0;
+}
+
+function updateCostEstimate() {
+  var sections = [];
+  document.querySelectorAll(".section-check:checked").forEach(function(el) { sections.push(el.value); });
+  var detail = document.getElementById("detail-level") ? document.getElementById("detail-level").value : "completo";
+  var calStyleEl = document.querySelector("input[name='cal-style']:checked");
+  var calStyle = calStyleEl ? calStyleEl.value : "strutturato";
+  var totalDays = 7;
+  var s = document.getElementById("trip-start"), e = document.getElementById("trip-end");
+  if (s && e && s.value && e.value) totalDays = Math.ceil((new Date(e.value) - new Date(s.value)) / 86400000) + 1;
+
+  /* Fixed output tokens per call (conservative estimates that actually work) */
+  var detailMult = detail === "essenziale" ? 0.6 : detail === "esperto" ? 1.4 : 1.0;
+  var calMult    = calStyle === "sintetico" ? 0.5 : calStyle === "dettagliato" ? 1.7 : 1.0;
+  var legCount   = Math.max(legs.length, 1);
+
+  var hasRest = sections.indexOf("restaurants") !== -1;
+  var hasExc  = sections.indexOf("excursions") !== -1 || sections.indexOf("museums") !== -1 || sections.indexOf("parks") !== -1;
+  var hasLog  = sections.indexOf("logistics") !== -1;
+  var hasAreas = sections.indexOf("zones") !== -1 || sections.indexOf("events") !== -1;
+  var hasCal  = sections.indexOf("calendar") !== -1;
+
+  var outTokens = Math.round(
+    4000 * detailMult +                            /* legs */
+    (hasRest ? 3000 * detailMult * legCount : 0) +
+    (hasExc  ? 4000 * detailMult * legCount : 0) +
+    (hasLog  ? 3000 * detailMult * legCount : 0) +
+    (hasAreas ? 2000 * legCount : 0) +
+    (hasCal  ? totalDays * 150 * calMult : 0)
+  );
+  var callCount = 1 + (hasRest?1:0) + (hasExc?1:0) + (hasLog?1:0) + (hasAreas?1:0) + (hasCal?1:0);
+  var inTokens  = callCount * 900;
+
+  var costUSD = ((inTokens / 1e6) * PRICE_INPUT_PER_M) + ((outTokens / 1e6) * PRICE_OUTPUT_PER_M);
+  var costMin = costUSD * 0.7;
+  var costMax = costUSD * 1.4;
+
+  var activeLabels = ["legs"];
+  if (hasRest) activeLabels.push("restaurants");
+  if (hasExc)  activeLabels.push("excursions");
+  if (hasLog)  activeLabels.push("logistics");
+  if (hasAreas) activeLabels.push("areas");
+  if (hasCal)  activeLabels.push("calendar");
+
+  document.getElementById("est-calls").textContent = callCount + " calls (" + activeLabels.join(", ") + ")";
+  document.getElementById("est-input-tokens").textContent = "~" + formatTokens(inTokens);
+  document.getElementById("est-output-tokens").textContent = "~" + formatTokens(outTokens);
+  renderCostDisplay(costMin, costMax);
+}
+
+function formatTokens(n) {
+  if (n >= 1000) return Math.round(n / 100) / 10 + "K";
+  return n + "";
+}
+
+function renderCostDisplay(minUSD, maxUSD) {
+  var min, max, symbol;
+  if (displayCurrency === "EUR") {
+    min = minUSD * EUR_USD;
+    max = maxUSD * EUR_USD;
+    symbol = "€";
+  } else {
+    min = minUSD;
+    max = maxUSD;
+    symbol = "$";
+  }
+  document.getElementById("cost-min-display").textContent = symbol + min.toFixed(2);
+  document.getElementById("cost-range-display").textContent = "– " + symbol + max.toFixed(2);
+}
+
+function setCurrency(cur) {
+  displayCurrency = cur;
+  document.getElementById("btn-usd").classList.toggle("active", cur === "USD");
+  document.getElementById("btn-eur").classList.toggle("active", cur === "EUR");
+  updateCostEstimate();
+}
+
+/* ============================================================
+   API KEY
+   ============================================================ */
+function updateGenerateBtn() {
+  var btn = document.getElementById("btn-generate");
+  if (!btn) return;
+  var isMock = !!(document.getElementById("mock-mode-toggle") && document.getElementById("mock-mode-toggle").checked);
+  if (isMock) { btn.disabled = false; return; }
+  var mode = getGenMode();
+  if (mode === "free") {
+    btn.disabled = (sourcePdfs.length === 0 && sourceCsvs.length === 0 && sourceTexts.length === 0);
+  } else {
+    var code = (document.getElementById("access-code") || {}).value || "";
+    btn.disabled = code.length < 3;
+  }
+}
+
+function onAccessCodeInput() {
+  updateGenerateBtn();
+}
+
+function onApiKeyInput() { /* legacy no-op */ }
+
+function onMockModeToggle() {
+  updateGenerateBtn();
+}
+
+/* ============================================================
+   GENERATION — MAIN ENTRY
+   ============================================================ */
+function startGeneration() {
+  var mode = getGenMode();
+  var isMock = !!(document.getElementById("mock-mode-toggle") && document.getElementById("mock-mode-toggle").checked);
+  var apiKey = ""; // non usata — chiamate via proxy Vercel
+  var accessCode = (document.getElementById("access-code") || {}).value.trim().toUpperCase();
+
+  if (!isMock && mode === "free") {
+    if (sourcePdfs.length === 0 && sourceCsvs.length === 0 && sourceTexts.length === 0) {
+      showError("Please upload at least one PDF, CSV or TXT/MD file for free mode."); return;
+    }
+    if (extractedItems.length === 0) {
+      showError("No items extracted from files. Try AI + file mode."); return;
+    }
+    startFreeGeneration();
+    return;
+  }
+
+  var isMock = !!(document.getElementById("mock-mode-toggle") && document.getElementById("mock-mode-toggle").checked);
+  if (!isMock && (!accessCode || accessCode.length < 3)) { showError("Inserisci un codice di accesso valido."); return; }
+
+  var title = document.getElementById("trip-title").value.trim() || "My Trip";
+  var startDate = document.getElementById("trip-start").value;
+  var endDate = document.getElementById("trip-end").value;
+  var homeBase = document.getElementById("trip-home").value.trim() || "Italia";
+  var currency = document.getElementById("trip-currency").value;
+  var lang = document.getElementById("trip-lang").value;
+  var tripType = document.querySelector("input[name='trip-type']:checked").value;
+  var detailLevel = document.getElementById("detail-level").value;
+  var budgetLevel = document.getElementById("budget-level").value;
+  var travelers = document.getElementById("travelers").value.trim();
+  var specialNotess = document.getElementById("special-notes").value.trim();
+
+  var enabledSections = [];
+  document.querySelectorAll(".section-check:checked").forEach(function(el) { enabledSections.push(el.value); });
+
+  var focusTags = [];
+  document.querySelectorAll(".focus-check:checked").forEach(function(el) { focusTags.push(el.value); });
+
+  if (!startDate || !endDate) { showError("Please enter trip start and end dates."); return; }
+  if (legs.length === 0 || !legs[0].name) { showError("Please enter at least the first destination name."); return; }
+
+  var totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000) + 1;
+
+  var calStyle = document.querySelector("input[name='cal-style']:checked");
+  var calendarStyle = calStyle ? calStyle.value : "strutturato";
+  var journeysPayload = buildJourneysPayload();
+
+  /* Add journeys section if any segments exist */
+  if (journeysPayload.length && enabledSections.indexOf("journeys") === -1) {
+    enabledSections = ["journeys"].concat(enabledSections);
+  }
+
+  var subFilters = {
+    restaurants: { cats: getSubFilters("restaurants"), extra: getSubFilterExtra("restaurants") },
+    excursions: { cats: getSubFilters("excursions"), extra: getSubFilterExtra("excursions") },
+    attractions: { cats: getSubFilters("attractions"), extra: {} },
+    logistics: { cats: getSubFilters("logistics"), extra: {} },
+    accommodation: { cats: getSubFilters("accommodation"), extra: getSubFilterExtra("accommodation") },
+    events: { cats: getSubFilters("events"), extra: {} }
+  };
+
+  var tripContext = {
+    title: title, startDate: startDate, endDate: endDate, totalDays: totalDays,
+    homeBase: homeBase, homeBaseDest: (document.getElementById("trip-home-dest")||{value:""}).value.trim() || homeBase, currency: currency, lang: lang, tripType: tripType,
+    legs: legs, enabledSections: enabledSections, detailLevel: detailLevel,
+    budgetLevel: budgetLevel, travelers: travelers, specialNotes: specialNotess,
+    focusTags: focusTags, calendarStyle: calendarStyle, journeys: journeysPayload,
+    genMode: mode, sourcePdfs: sourcePdfs, sourceUrls: sourceUrls, subFilters: subFilters
+  };
+
+  hideError();
+  showProgress();
+  document.getElementById("btn-generate").disabled = true;
+  generatedJson = null;
+
+  mockMode = !!(document.getElementById("mock-mode-toggle") && document.getElementById("mock-mode-toggle").checked);
+  if (mockMode) {
+    runMockPipeline(tripContext);
+    return;
+  }
+
+  runGenerationPipeline(accessCode, tripContext);
+}
+
+/* ============================================================
+   MOCK PIPELINE — bypass API, dummy data for UI testing
+   ============================================================ */
+async function runMockPipeline(ctx) {
+  var steps = [
+    "Base structure (meta, trip, legs)",
+    "Restaurants & gastronomy",
+    "Accommodation options",
+    "Excursions & parks",
+    "Logistics, events & zones",
+    "Daily calendar"
+  ];
+  var ids = steps.map(function(s) { return addProgressStep(s); });
+
+  log("> MOCK MODE — no real API calls");
+  for (var i = 0; i < ids.length; i++) {
+    setStepStatus(ids[i], "active");
+    await new Promise(function(r) { setTimeout(r, 180); });
+    setProgressBar(Math.round((i+1) / ids.length * 94));
+    setStepStatus(ids[i], "done");
+    log("  ✓ " + steps[i] + " (mock)");
+  }
+
+  var mockJson = buildMockJson(ctx);
+  generatedJson = mockJson;
+  setProgressBar(100);
+  log("  ✓ Mock JSON generated — " + JSON.stringify(mockJson).length + " characters");
+  showResult(mockJson, ctx);
+  document.getElementById("btn-generate").disabled = false;
+}
+
+function buildMockJson(ctx) {
+  var now = new Date().toISOString();
+  var mockLegs = (ctx.legs || []).map(function(l, i) {
+    var legId = (l.name || "leg").toLowerCase().replace(/[^a-z0-9]/g, "_") || ("leg_" + (i+1));
+    var dateFrom = l.dateFrom || ctx.startDate;
+    var dateTo = l.dateTo || ctx.endDate;
+    return {
+      id: legId, name: l.name || ("Leg " + (i+1)), order: i+1, color: l.color || "#4f9ef8",
+      schedule: { mode: l.mode || "fixed", date_from: dateFrom, date_to: dateTo, days_count: l.days || 3, days_min: null, days_max: null },
+      geo: { center_lat: 45.0 + i * 0.5, center_lng: 9.0 + i * 0.5, zoom_default: 13, map_files: [] },
+      transport_in: null,
+      accommodation: {
+        confirmed_item: null, booking_ref: null, booking_url: null,
+        check_in: dateFrom, check_out: dateTo,
+        options: [
+          { id: "acc_" + legId + "_01", name: "Hotel Mock To", lat: 45.01 + i*0.5, lng: 9.01 + i*0.5, price_night: 80, price_currency: ctx.currency || "EUR", rating: 4.2, url: "", source: "ai_generated", confidence: "medium", notes: "Mock — dati fittizi" },
+          { id: "acc_" + legId + "_02", name: "Hotel Mock B", lat: 45.02 + i*0.5, lng: 9.02 + i*0.5, price_night: 130, price_currency: ctx.currency || "EUR", rating: 4.6, url: "", source: "ai_generated", confidence: "medium", notes: "Mock — dati fittizi" }
+        ]
+      },
+      restaurants: [
+        { id: "rest_" + legId + "_01", name: "Mock Restaurant 1", category: "local", lat: 45.01 + i*0.5, lng: 9.01 + i*0.5, price_range: "\u20ac\u20ac", must_try: "Local dish", hours: "12:00-22:00", source: "ai_generated", source_label: "AI", confidence: "medium", conflict: null, notes: "Mock", url: "" },
+        { id: "rest_" + legId + "_02", name: "Mock Street Food", category: "street food", lat: 45.02 + i*0.5, lng: 9.02 + i*0.5, price_range: "\u20ac", must_try: "Local specialty", hours: "10:00-20:00", source: "ai_generated", source_label: "AI", confidence: "medium", conflict: null, notes: "Mock", url: "" }
+      ],
+      attractions: [
+        { id: "att_" + legId + "_01", name: "Piazza Centrale Mock", type: "square", lat: 45.03 + i*0.5, lng: 9.03 + i*0.5, free: true, price_approx: "", hours: "", duration_hours: 1, description: "Piazza storica del centro.", source: "ai_generated", confidence: "medium", notes: "Mock", url: "" },
+        { id: "att_" + legId + "_02", name: "Cattedrale Mock", type: "church", lat: 45.04 + i*0.5, lng: 9.04 + i*0.5, free: false, price_approx: "5 EUR", hours: "9:00-18:00", duration_hours: 1, description: "Cattedrale storica.", source: "ai_generated", confidence: "medium", notes: "Mock", url: "" }
+      ],
+      excursions: [
+        { id: "exc_" + legId + "_01", name: "Mock Excursion 1", type: "nature", duration_hours: 4, difficulty: "easy", lat: 45.03 + i*0.5, lng: 9.03 + i*0.5, permit_required: false, permit_notes: "", best_time: "morning", source: "ai_generated", source_label: "AI", confidence: "medium", conflict: null, notes: "Mock", url: "" },
+        { id: "exc_" + legId + "_02", name: "Mock Cultural Visit", type: "cultural", duration_hours: 2, difficulty: "easy", lat: 45.04 + i*0.5, lng: 9.04 + i*0.5, permit_required: false, permit_notes: "", best_time: "afternoon", source: "ai_generated", source_label: "AI", confidence: "medium", conflict: null, notes: "Mock", url: "" }
+      ],
+      museums: [
+        { id: "mus_" + legId + "_01", name: "Museo Mock", lat: 45.05 + i*0.5, lng: 9.05 + i*0.5, free: false, price_approx: "10 EUR", hours: "9:00-18:00", source: "ai_generated", confidence: "medium", conflict: null, notes: "Mock", url: "" }
+      ],
+      parks: [],
+      events: [],
+      logistics: [
+        { id: "log_" + legId + "_01", category: "transport", title: "Local transport", body: "Mock info on local transport.", source: "ai_generated", source_label: "AI", confidence: "medium", conflict: null, notes: "", url: "" },
+        { id: "log_" + legId + "_02", category: "health", title: "Health", body: "Mock health info.", source: "ai_generated", source_label: "AI", confidence: "medium", conflict: null, notes: "", url: "" }
+      ],
+      zones: [
+        { id: "zone_" + legId + "_01", name: "Centro storico Mock", type: "district", lat: 45.0 + i*0.5, lng: 9.0 + i*0.5, description: "Zona centrale mock.", source: "ai_generated", confidence: "medium" }
+      ],
+      notes_free: "Fromti mock generati per test UI."
+    };
+  });
+
+  /* Mock calendar: one day per leg */
+  var calendar = {};
+  var d = new Date(ctx.startDate);
+  (ctx.legs || []).forEach(function(l, i) {
+    var legId = (l.name || "leg").toLowerCase().replace(/[^a-z0-9]/g, "_") || ("leg_" + (i+1));
+    var key = d.toISOString().slice(0, 10);
+    calendar[key] = {
+      leg_id: legId, leg_color: l.color || "#4f9ef8", type: "normal",
+      journey_refs: [], accommodation_ref: "acc_" + legId + "_01",
+      slots: {
+        morning: { text: "Mattina mock", items: [{ time: "09:00", activity: "Mock morning activity", duration_min: 120, description: "", url: "", booking_required: false }] },
+        lunch: { text: "Pranzo mock", items: [{ time: "13:00", activity: "Pranzo al ristorante mock", duration_min: 60, description: "", url: "", booking_required: false }] },
+        afternoon: { text: "Pomeriggio mock", items: [{ time: "15:00", activity: "Mock afternoon activity", duration_min: 120, description: "", url: "", booking_required: false }] },
+        evening: { text: "Sera mock", items: [{ time: "20:00", activity: "Cena mock", duration_min: 90, description: "", url: "", booking_required: false }] }
+      }
+    };
+    d.setDate(d.getDate() + 1);
+  });
+
+  return {
+    meta: {
+      schema_version: "1.1", title: ctx.title || "Viaggio Mock",
+      generated_at: now, language: ctx.lang || "it",
+      trip_type: ctx.tripType || "tour",
+      calendar_style: ctx.calendarStyle || "strutturato",
+      enabled_sections: ctx.enabledSections || ["calendar","restaurants","excursions","museums","logistics","accommodation","zones"],
+      offline_mode: true, sources_used: ["ai_generated"],
+      _mock: true
+    },
+    trip: {
+      start_date: ctx.startDate, end_date: ctx.endDate,
+      total_days: ctx.totalDays || 7, home_base: ctx.homeBase || "Italia",
+      currency: ctx.currency || "EUR", currency_secondary: null,
+      emergency_contacts: [], global_notes: "JSON mock — sostituire con generazione reale."
+    },
+    journeys: ctx.journeys || [],
+    legs: mockLegs,
+    calendar: calendar,
+    conflicts: [],
+    user_overrides: { _note: "User edits.", calendar: {}, restaurants: {}, excursions: {}, museums: {}, parks: {}, events: {}, logistics: {}, accommodation: {}, zones: {}, conflicts: {} }
+  };
+}
+
+/* ============================================================
+   GENERATION PIPELINE
+   ============================================================ */
+var progressSteps = [];
+
+function showProgress() {
+  document.getElementById("progress-area").classList.add("visible");
+  document.getElementById("result-area").classList.remove("visible");
+  progressSteps = [];
+  document.getElementById("progress-steps").innerHTML = "";
+  document.getElementById("progress-log").innerHTML = "";
+  setProgressBar(0);
+}
+
+function addProgressStep(label) {
+  var id = "ps-" + progressSteps.length;
+  progressSteps.push({ id: id, label: label, status: "pending" });
+  var div = document.createElement("div");
+  div.className = "progress-step";
+  div.id = id;
+  div.innerHTML = "<div class='step-dot'></div><span>" + label + "</span>";
+  document.getElementById("progress-steps").appendChild(div);
+  return id;
+}
+
+function setStepStatus(id, status) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.className = "progress-step " + status;
+}
+
+function setProgressBar(pct) {
+  document.getElementById("progress-bar").style.width = pct + "%";
+}
+
+function log(msg) {
+  var el = document.getElementById("progress-log");
+  el.innerHTML += msg + "\n";
+  el.scrollTop = el.scrollHeight;
+}
+
+function showError(msg) {
+  var el = document.getElementById("error-box");
+  el.textContent = "⚠ " + msg;
+  el.classList.add("visible");
+}
+
+function hideError() {
+  document.getElementById("error-box").classList.remove("visible");
+}
+
+async function runGenerationPipeline(apiKey, ctx) {
+  var stepIds = {};
+  var hasJourneys = ctx.journeys && ctx.journeys.length > 0;
+  var hasSources = sourceUrls.length > 0 || sourcePdfs.length > 0;
+  var totalCalls = (hasJourneys ? 1 : 0) + (hasSources ? (sourceUrls.length + sourcePdfs.length) : 0) + 5;
+
+  if (hasSources)  stepIds.src  = addProgressStep("Extracting from sources (" + (sourceUrls.length + sourcePdfs.length) + " fonti)");
+  if (hasJourneys) stepIds.jour = addProgressStep("A/R Transport (journeys)");
+  stepIds.meta  = addProgressStep("Base structure (meta, trip, legs)");
+  stepIds.food  = addProgressStep("Restaurants & gastronomy");
+  stepIds.acc   = addProgressStep("Accommodation options");
+  stepIds.exc   = addProgressStep("Excursions & parks");
+  stepIds.att   = addProgressStep("Urban attractions");
+  stepIds.log   = addProgressStep("Logistics, events & zones");
+  stepIds.cal   = addProgressStep("Daily calendar");
+
+  var finalJson = null;
+
+  try {
+    /* CALL -1 — extract from user-provided sources (URLs + PDFs) */
+    if (hasSources) {
+      setStepStatus(stepIds.src, "active");
+      log("> Estrazione da " + (sourceUrls.length + sourcePdfs.length) + " sorgenti...");
+      var srcItems = await extractFromSources(apiKey, ctx);
+      setStepStatus(stepIds.src, "done");
+      log("  \u2713 " + srcItems.length + " elementi estratti dalle sorgenti");
+    }
+
+    /* CALL 0 — journeys (user-provided, no API call needed) */
+    var journeysFromta = ctx.journeys || [];
+    if (hasJourneys) {
+      setStepStatus(stepIds.jour, "active");
+      log("> Preparazione journeys manuali...");
+      setProgressBar(5);
+      var totSegs = ctx.journeys.reduce(function(n, j) { return n + j.segments.length; }, 0);
+      setStepStatus(stepIds.jour, "done");
+      setProgressBar(10);
+      log("  ✓ " + ctx.journeys.length + " journey, " + totSegs + " segments");
+    }
+
+    /* CALL 1 — meta + trip + legs structure */
+    setStepStatus(stepIds.meta, "active");
+    log("> Calls " + (hasJourneys ? "2-3" : "1-2") + "/" + totalCalls + ": meta + legs (2 separate calls)...");
+    setProgressBar(hasJourneys ? 14 : 5);
+    var baseJson = await callMeta(apiKey, ctx);
+    baseJson.journeys = journeysFromta;
+    /* Merge source-extracted items into legs */
+    if (hasSources && extractedItems.length > 0) {
+      mergeExtractedIntoJson(baseJson, extractedItems, ctx);
+      log("  + " + extractedItems.length + " elementi da sorgenti mergiati nei legs");
+    }
+    /* Update sources_used in meta */
+    if (baseJson.meta) {
+      if (hasSources) {
+        if (sourceUrls.length > 0) baseJson.meta.sources_used.push("web_fetch");
+        if (sourcePdfs.length > 0) baseJson.meta.sources_used.push("pdf_extract");
+      }
+      baseJson.meta.sources_used = baseJson.meta.sources_used.filter(function(v,i,a){return a.indexOf(v)===i;});
+    }
+    setStepStatus(stepIds.meta, "done");
+    setProgressBar(hasJourneys ? 28 : 22);
+    log("  ✓ Meta: " + ctx.legs.length + " leg" + (ctx.legs.length === 1 ? "" : "s") + " structured");
+
+
+
+    /* CALL 2 — restaurants */
+    if (ctx.enabledSections.indexOf("restaurants") !== -1) {
+      setStepStatus(stepIds.food, "active");
+      log("> Chiamata 2/6: ristoranti...");
+      var restJson = await callRestaurants(apiKey, ctx, baseJson);
+      mergeIntoLegs(baseJson, restJson, "restaurants");
+      setStepStatus(stepIds.food, "done");
+      setProgressBar(35);
+      log("  ✓ Restaurants generated");
+    } else {
+      setStepStatus(stepIds.food, "done");
+      setProgressBar(35);
+      log("  — Restaurants: section disabled, skip");
+    }
+
+    /* CALL 2b — accommodation */
+    if (ctx.enabledSections.indexOf("accommodation") !== -1) {
+      setStepStatus(stepIds.acc, "active");
+      log("> Chiamata 2b/6: alloggi...");
+      var accJson = await callAccommodation(apiKey, ctx, baseJson);
+      mergeAccommodationIntoLegs(baseJson, accJson);
+      setStepStatus(stepIds.acc, "done");
+      setProgressBar(46);
+      log("  ✓ Accommodation generated");
+    } else {
+      setStepStatus(stepIds.acc, "done");
+      setProgressBar(46);
+      log("  — Accommodation: section disabled, skip");
+    }
+
+    /* CALL 3 — excursions + museums + parks */
+    var hasExc = ctx.enabledSections.indexOf("excursions") !== -1;
+    var hasMus = ctx.enabledSections.indexOf("museums") !== -1;
+    var hasPark = ctx.enabledSections.indexOf("parks") !== -1;
+    if (hasExc || hasMus || hasPark) {
+      setStepStatus(stepIds.exc, "active");
+      log("> Chiamata 3/6: escursioni + musei + parchi...");
+      var excJson = await callExcursions(apiKey, ctx, baseJson);
+      if (hasExc) mergeIntoLegs(baseJson, excJson, "excursions");
+      if (hasMus) mergeIntoLegs(baseJson, excJson, "museums");
+      if (hasPark) mergeIntoLegs(baseJson, excJson, "parks");
+      setStepStatus(stepIds.exc, "done");
+      setProgressBar(62);
+      log("  ✓ Excursions/parks generated");
+    } else {
+      setStepStatus(stepIds.exc, "done");
+      setProgressBar(62);
+      log("  — Excursions: section disabled, skip");
+    }
+
+    /* CALL 3b — attractions (attrazioni urbane) */
+    if (ctx.enabledSections.indexOf("attractions") !== -1) {
+      setStepStatus(stepIds.att, "active");
+      log("> Chiamata 3b: attrazioni urbane...");
+      var attJson = await callAttractions(apiKey, ctx, baseJson);
+      mergeAttractionsIntoLegs(baseJson, attJson);
+      setStepStatus(stepIds.att, "done");
+      setProgressBar(70);
+      log("  ✓ Attractions generated");
+    } else {
+      setStepStatus(stepIds.att, "done");
+      setProgressBar(70);
+      log("  — Attractions: section disabled, skip");
+    }
+
+    /* CALL 4a — logistics */
+    var hasLog = ctx.enabledSections.indexOf("logistics") !== -1;
+    var hasEvt = ctx.enabledSections.indexOf("events") !== -1;
+    var hasAreas = ctx.enabledSections.indexOf("zones") !== -1;
+    setStepStatus(stepIds.log, "active");
+    if (hasLog) {
+      log("> Chiamata 4a: logistica...");
+      var logJson = await callLogistics(apiKey, ctx, baseJson);
+      mergeIntoLegs(baseJson, logJson, "logistics");
+      if (logJson && logJson.emergency_contacts && logJson.emergency_contacts.length) {
+        baseJson.trip.emergency_contacts = logJson.emergency_contacts;
+      }
+      setProgressBar(65);
+      log("  \u2713 Logistics generata");
+    }
+    /* CALL 4b — events + zones */
+    if (hasEvt || hasAreas) {
+      var zoneTokens = 4000;
+      if (zoneTokens > 0) {
+        log("> Chiamata 4b: eventi + zone (" + zoneTokens + " tokens)...");
+        var zoneJson = await callAreas(apiKey, ctx, baseJson);
+        if (hasEvt) mergeIntoLegs(baseJson, zoneJson, "events");
+        if (hasAreas) mergeIntoLegs(baseJson, zoneJson, "zones");
+        log("  \u2713 Areas/eventi generati");
+      }
+    }
+    setStepStatus(stepIds.log, "done");
+    setProgressBar(76);
+    if (!hasLog && !hasEvt && !hasAreas) log("  \u2014 Logistics: sezione disabilitata, skip");
+
+
+    /* CALL 5 — calendar */
+    if (ctx.enabledSections.indexOf("calendar") !== -1) {
+      setStepStatus(stepIds.cal, "active");
+      log("> Chiamata 5/5: calendario giornaliero...");
+      var calJson = await callCalendar(apiKey, ctx, baseJson);
+      baseJson.calendar = calJson.calendar || {};
+      setStepStatus(stepIds.cal, "done");
+      setProgressBar(94);
+      log("  ✓ Calendar " + Object.keys(baseJson.calendar).length + " days generated");
+    } else {
+      setStepStatus(stepIds.cal, "done");
+      setProgressBar(94);
+      log("  — Calendar: section disabled, skip");
+    }
+
+    /* FINALIZE */
+    baseJson.user_overrides = buildUserOverrides();
+    baseJson.conflicts = [];
+    /* Ensure schema_version is 1.1 */
+    if (baseJson.meta) {
+      baseJson.meta.schema_version = "1.1";
+      baseJson.meta.calendar_style = ctx.calendarStyle || "strutturato";
+    }
+    /* Ensure journeys is present even if empty */
+    if (!baseJson.journeys) baseJson.journeys = [];
+    finalJson = baseJson;
+    generatedJson = finalJson;
+
+    setProgressBar(100);
+    log("  \u2713 JSON completo generato — " + JSON.stringify(finalJson).length + " characters");
+    showResult(finalJson, ctx);
+
+  } catch(err) {
+    var activeStep = Object.values(stepIds).find(function(id) {
+      var el = document.getElementById(id);
+      return el && el.classList.contains("active");
+    });
+    if (activeStep) setStepStatus(activeStep, "error");
+    showError("Error during generation: " + err.message);
+    log("  \u2717 Errore: " + err.message);
+    document.getElementById("btn-generate").disabled = false;
+  }
+}
+
+/* ============================================================
+   MERGE HELPER
+   ============================================================ */
+function mergeIntoLegs(baseJson, partialJson, field) {
+  if (!partialJson || !partialJson.legs) return;
+  for (var i = 0; i < baseJson.legs.length; i++) {
+    var legId = baseJson.legs[i].id;
+    var match = (partialJson.legs || []).find(function(l) { return l.id === legId; });
+    if (match && match[field] !== undefined) {
+      baseJson.legs[i][field] = match[field];
+    } else if (baseJson.legs[i][field] === undefined) {
+      baseJson.legs[i][field] = [];
+    }
+  }
+}
+
+function buildUserOverrides() {
+  return {
+    _note: "User edits keyed by item id. Merged at runtime over generated data.",
+    calendar: {}, restaurants: {}, excursions: {}, museums: {},
+    parks: {}, events: {}, logistics: {}, accommodation: {},
+    zones: {}, conflicts: {}
+  };
+}
+
+/* ============================================================
+   RESULT DISPLAY
+   ============================================================ */
+function showResult(json, ctx) {
+  document.getElementById("result-area").classList.add("visible");
+  var str = JSON.stringify(json, null, 2);
+  document.getElementById("json-preview").textContent = str;
+
+  var title = (ctx.title || "trip").toLowerCase().replace(/\s+/g, "_");
+  document.getElementById("btn-download").setAttribute("data-filename", "trip_data_" + title + "_" + ctx.startDate + ".json");
+  document.getElementById("btn-generate").disabled = false;
+  openStep("step3");
+}
+
+function copyJson() {
+  if (!generatedJson) return;
+  navigator.clipboard.writeText(JSON.stringify(generatedJson, null, 2)).then(function() {
+    var btn = document.querySelector(".result-actions .btn-secondary");
+    var orig = btn.textContent;
+    btn.textContent = "✓ Copiato!";
+    setTimeout(function() { btn.textContent = orig; }, 1800);
+  });
+}
+
+function downloadJson() {
+  if (!generatedJson) return;
+  var btn = document.getElementById("btn-download");
+  var filename = btn.getAttribute("data-filename") || "trip_data.json";
+  var blob = new Blob([JSON.stringify(generatedJson, null, 2)], { type: "application/json" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   API CALLS — HELPERS
+   ============================================================ */
+function buildTripContext(ctx) {
+  var legsDesc = ctx.legs.map(function(l, i) {
+    return (i + 1) + ". " + l.name + " (" + l.days + " days, mode:" + l.mode + ", colore:" + l.color + ")";
+  }).join("\n");
+  return "VIAGGIO: " + ctx.title + "\n" +
+    "Tipo: " + ctx.tripType + "\n" +
+    "Date: " + ctx.startDate + " -> " + ctx.endDate + " (" + ctx.totalDays + " days)\n" +
+    "Base partenza: " + ctx.homeBase + (ctx.homeBaseDest && ctx.homeBaseDest !== ctx.homeBase ? " | Base rientro: " + ctx.homeBaseDest : "") + " | Valuta: " + ctx.currency + " | Output language: " + ctx.lang + "\n" +
+    "Budget: " + ctx.budgetLevel + " | Livello dettaglio: " + ctx.detailLevel + "\n" +
+    "Travellers: " + (ctx.travelers || "non specificato") + "\n" +
+    "Focus: " + (ctx.focusTags.length ? ctx.focusTags.join(", ") : "generale") + "\n" +
+    "Notes speciali: " + (ctx.specialNotes || "nessuna") + "\n" +
+    "Sezioni abilitate: " + ctx.enabledSections.join(", ") + "\n" +
+    "Calendar style: " + (ctx.calendarStyle || "strutturato") + "\n" +
+    "LEGS:\n" + legsDesc +
+    (ctx.journeys && ctx.journeys.length ? "\nJOURNEY INSERITI: " + ctx.journeys.map(function(j) { return j.label + " " + j.date; }).join(", ") : "");
+}
+
+var TRIPCRAFT_API_ENDPOINT = "https://tripcraft-api.vercel.app/api/generate";
+
+async function callApi(accessCode, systemPrompt, userMsg, maxTokens) {
+  var accessCodeVal = accessCode || (document.getElementById("access-code") || {}).value.trim().toUpperCase();
+  var resp = await fetch(TRIPCRAFT_API_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      access_code: accessCodeVal,
+      model: "claude-sonnet-4-6",
+      max_tokens: maxTokens || 4000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMsg }]
+    })
+  });
+
+  if (!resp.ok) {
+    var errFromta = await resp.json().catch(function() { return {}; });
+    throw new Error((errFromta.error && errFromta.error.message) ? errFromta.error.message : "HTTP " + resp.status);
+  }
+
+  var data = await resp.json();
+  var text = (data.content || []).map(function(b) { return b.text || ""; }).join("");
+  /* Log stop_reason to help debug */
+  var stopReason = data.stop_reason || "unknown";
+  var logEl = document.getElementById("progress-log");
+  if (stopReason === "max_tokens") {
+    if (logEl) logEl.innerHTML += "  ⚠ stop_reason=max_tokens — output troncato, tento repair JSON...\n";
+  }
+  /* Strip markdown fences */
+  text = text.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    /* Retry 1: find outermost { } block */
+    var start = text.indexOf("{");
+    var end = text.lastIndexOf("}");
+    if (start !== -1 && end !== -1 && end > start) {
+      try { return JSON.parse(text.slice(start, end + 1)); } catch(e2) { /* fall through */ }
+    }
+
+    /* Retry 2: se max_tokens, tenta repair chiudendo strutture aperte */
+    if (stopReason === "max_tokens" && start !== -1) {
+      var partial = text.slice(start);
+      /* Chiudi arrays e oggetti aperti contando parentesi */
+      var depth = 0; var inStr = false; var escaped = false;
+      for (var ci = 0; ci < partial.length; ci++) {
+        var ch = partial[ci];
+        if (escaped) { escaped = false; continue; }
+        if (ch === "\\" && inStr) { escaped = true; continue; }
+        if (ch === '"') { inStr = !inStr; continue; }
+        if (!inStr) {
+          if (ch === "{" || ch === "[") depth++;
+          if (ch === "}" || ch === "]") depth--;
+        }
+      }
+      /* Remove trailing virgole e chiudi strutture */
+      var repaired = partial.replace(/,\s*$/, "").replace(/,\s*([\]}])/g, "$1");
+      var closes = "";
+      /* Calcola quante parentesi mancano riscansionando il repaired */
+      var dOpen = (repaired.match(/\{/g) || []).length - (repaired.match(/\}/g) || []).length;
+      var aOpen = (repaired.match(/\[/g) || []).length - (repaired.match(/\]/g) || []).length;
+      for (var di = 0; di < aOpen; di++) closes += "]";
+      for (var oi = 0; oi < dOpen; oi++) closes += "}";
+      try {
+        var fixed = JSON.parse(repaired + closes);
+        if (logEl) logEl.innerHTML += "  ✓ JSON successfully repaired (partial but usable data)\n";
+        return fixed;
+      } catch(e3) { /* fall through */ }
+    }
+
+    /* Fallback: log raw per debug */
+    if (logEl) logEl.innerHTML += "  DEBUG risposta raw (primi 400 char):\n  " + text.slice(0, 400).replace(/\n/g, "\n  ") + "\n";
+    throw new Error("JSON non valido (stop:" + stopReason + "): " + e.message);
+  }
+}
+
+var SYSTEM_JSON_ONLY = "Sei un generatore di dati di viaggio. Rispondi EXCLUSIVELY con JSON valido, senza backtick, senza markdown, senza commenti, senza testo prima o dopo. Il JSON deve essere completo e parsabile con JSON.parse().";
+
+/* ============================================================
+   CALL 1 — META + LEGS STRUCTURE
+   ============================================================ */
+async function callMetaBase(apiKey, ctx) {
+  /* No API call needed — all data comes from user inputs */
+  return {
+    meta: {
+      schema_version: "1.1",
+      title: ctx.title,
+      generated_at: new Date().toISOString(),
+      language: ctx.lang,
+      trip_type: ctx.tripType,
+      calendar_style: ctx.calendarStyle || "strutturato",
+      enabled_sections: ctx.enabledSections,
+      offline_mode: true,
+      sources_used: ["ai_generated"]
+    },
+    trip: {
+      start_date: ctx.startDate,
+      end_date: ctx.endDate,
+      total_days: ctx.totalDays,
+      home_base: ctx.homeBase,
+      currency: ctx.currency,
+      currency_secondary: null,
+      emergency_contacts: [],
+      global_notes: ""
+    }
+  };
+}
+
+async function callLegs(apiKey, ctx) {
+  var hasJ = ctx.journeys && ctx.journeys.length > 0;
+  var sys = "Sei un esperto di viaggi. Rispondi SOLO con JSON valido, senza markdown, senza commenti, senza testo extra. Il JSON deve essere parsabile con JSON.parse().";
+
+  var legDescs = ctx.legs.map(function(l, i) {
+    return (i+1) + ". " + l.name + " — " + l.days + " days";
+  }).join("; ");
+
+  var journeyNotes = hasJ
+    ? "I trasporti To/R sono forniti dall\'utente. Per le tappe coperte usa transport_in:null."
+    : "Crea transport_in realistico per ogni leg (type, from, to, notes).";
+
+  /* Schema template using single-quote outer to avoid escaping JSON keys */
+  var schemaTemplate = '{ "legs": [ { "id": "slug", "name": "Nome", "order": 1, "color": "#HEX", "schedule": { "mode": "fixed", "date_from": "YYYY-MM-DD", "date_to": "YYYY-MM-DD", "days_count": N, "days_min": null, "days_max": null }, "geo": { "center_lat": REAL_LAT, "center_lng": LNG_REToLE, "zoom_default": 13, "map_files": [] }, "transport_in": null, "accommodation": { "confirmed_item": null, "booking_ref": null, "booking_url": null, "check_in": "YYYY-MM-DD", "check_out": "YYYY-MM-DD", "options": [ { "id": "acc_LEGID_01", "name": "Hotel", "lat": LAT, "lng": LNG, "price_night": 100, "price_currency": "EUR", "rating": 4.2, "url": "", "source": "ai_generated", "confidence": "medium", "notes": "" }, { "id": "acc_LEGID_02", "name": "Hotel 2", "lat": LAT, "lng": LNG, "price_night": 70, "price_currency": "EUR", "rating": 4.0, "url": "", "source": "ai_generated", "confidence": "medium", "notes": "" } ] }, "restaurants": [], "excursions": [], "museums": [], "parks": [], "events": [], "logistics": [], "zones": [], "notes_free": "Info pratiche." } ] }';
+  schemaTemplate = schemaTemplate.replace('"price_currency": "EUR"', '"price_currency": "' + ctx.currency + '"');
+
+  var user = "Viaggio: " + ctx.title + " | " + ctx.tripType + " | " + ctx.startDate + " -> " + ctx.endDate +
+    " | Base: " + ctx.homeBase + " | Budget: " + ctx.budgetLevel + " | Lingua: " + ctx.lang +
+    "\nLEGS: " + legDescs +
+    "\n" + journeyNotes +
+    "\n\nGenera { legs: [...] } con una entry per ogni tappa. Precise and REAL GEOGRAPHIC coordinates. Schema da seguire:\n" + schemaTemplate;
+
+  return await callApi(apiKey, sys, user, 6000);
+}
+
+async function callMeta(apiKey, ctx) {
+  var baseResult = await callMetaBase(apiKey, ctx);
+  var legsResult = await callLegs(apiKey, ctx);
+  var merged = Object.assign({}, baseResult, legsResult);
+  if (!merged.meta) merged.meta = baseResult.meta || {};
+  if (!merged.trip) merged.trip = baseResult.trip || {};
+  merged.journeys = [];
+  merged.calendar = {};
+  merged.conflicts = [];
+  merged.user_overrides = {};
+  return merged;
+}
+
+/* ============================================================
+   CALL 2 — RESTAURANTS
+   ============================================================ */
+async function callRestaurants(apiKey, ctx, baseJson) {
+  var sf = (ctx.subFilters && ctx.subFilters.restaurants) || { cats: [], extra: {} };
+  var catMap = { local:"locale tradizionale", street_food:"street food", fine_dining:"fine dining", vegetarian:"vegetariano/vegano", seafood:"pesce", cafe:"caffe/pasticcerie" };
+  var catFilter = sf.cats.length ? sf.cats.map(function(c) { return catMap[c] || c; }).join(", ") : "qualsiasi categoria";
+  var ratingFilter = sf.extra.minRating > 0 ? "Solo locali con rating stimato >= " + sf.extra.minRating + "\n" : "";
+  var priceFilter = sf.extra.priceRange && sf.extra.priceRange !== "any" ? "Fascia di prezzo richiesta: " + sf.extra.priceRange + "\n" : "";
+
+  var sys = SYSTEM_JSON_ONLY + "\n\nGenera ristoranti e locali per ogni tappa di un viaggio. Restituisci:\n" +
+    "{\n" +
+    '  "legs": [ { "id":"SAME_LEG_ID", "restaurants":[ { "id":"rest_LEGID_01", "name":"...", "category":"locale|street|fine|cafe|bakery|international|other", "lat":0.0, "lng":0.0, "price_range":"\u20ac|\u20ac\u20ac|\u20ac\u20ac\u20ac", "must_try":"...", "hours":"...", "source":"ai_generated", "source_label":"AI", "confidence":"medium", "conflict":null, "notes":"", "url":"" } ] } ]\n' +
+    "}\n\nRegole:\n- " + ctx.detailLevel + " livello di dettaglio\n- Budget: " + ctx.budgetLevel + "\n- 3-6 ristoranti per tappa (meno se livello essenziale, di piu' se esperto)\n" +
+    "- Categorie richieste dall'utente: " + catFilter + " — concentrati SOLO su queste categorie\n" +
+    ratingFilter + priceFilter +
+    "- Coordinate precise e realistiche\n- url: lascia sempre stringa vuota \"\" — NON inventare link a siti web o pagine, perche' potrebbero non esistere o essere sbagliati\n- Tutti i testi in lingua: " + ctx.lang;
+
+  var legsContext = (baseJson.legs || []).map(function(l) { return l.id + ": " + l.name; }).join(", ");
+  var user = buildTripContext(ctx) + "\n\nLegs nel JSON: " + legsContext;
+  return await callApi(apiKey, sys, user, 6000);
+}
+
+/* ============================================================
+   CALL 2b — ACCOMMODATION
+   ============================================================ */
+async function callAccommodation(apiKey, ctx, baseJson) {
+  var sf = (ctx.subFilters && ctx.subFilters.accommodation) || { cats: [], extra: {} };
+  var catMap = { hotel:"hotel", hostel:"hostel/ostelli", apartment:"appartamenti/B&B", boutique:"boutique/locali" };
+  var catFilter = sf.cats.length ? sf.cats.map(function(c) { return catMap[c] || c; }).join(", ") : "qualsiasi tipo";
+  var ratingFilter = sf.extra.minRating > 0 ? "Solo strutture con rating stimato >= " + sf.extra.minRating + "\n" : "";
+  var priceFilter = sf.extra.priceRange && sf.extra.priceRange !== "any" ? "Fascia di prezzo richiesta: " + sf.extra.priceRange + "\n" : "";
+
+  var sys = SYSTEM_JSON_ONLY + "\n\nGenera opzioni di alloggio per ogni tappa di un viaggio. Restituisci:\n" +
+    "{\n" +
+    "  \"legs\": [ { \"id\":\"SAME_LEG_ID\", \"accommodation\": { \"confirmed_item\": null, \"booking_ref\": null, \"booking_url\": null, \"check_in\": \"YYYY-MM-DD\", \"check_out\": \"YYYY-MM-DD\", \"options\": [ { \"id\": \"acc_LEGID_01\", \"name\": \"Nome hotel\", \"lat\": 0.0, \"lng\": 0.0, \"price_night\": 0, \"price_currency\": \"" + ctx.currency + "\", \"rating\": 4.0, \"url\": \"\", \"source\": \"ai_generated\", \"confidence\": \"medium\", \"notes\": \"\" } ] } } ]\n" +
+    "}\n\nRegole:\n" +
+    "- 2-3 opzioni per tappa con fasce di prezzo diverse (economico, medio, comfort)\n" +
+    "- Tipi richiesti dall'utente: " + catFilter + " — concentrati SOLO su questi tipi\n" +
+    ratingFilter + priceFilter +
+    "- Budget viaggio: " + ctx.budgetLevel + " — adatta la selezione\n" +
+    "- Real and precise coordinates for each venue\n" +
+    "- check_in = date_from della tappa, check_out = date_to della tappa\n" +
+    "- confidence: medium per hotel noti, low per strutture meno conosciute\n" +
+    "- Includi almeno 1 opzione boutique/locale se disponibile\n" +
+    "- Tutti i testi in lingua: " + ctx.lang;
+
+  var legsContext = (baseJson.legs || []).map(function(l) {
+    return l.id + ": " + l.name + " (" + (l.schedule ? l.schedule.date_from + " -> " + l.schedule.date_to : "date TBD") + ")";
+  }).join(", ");
+  var user = buildTripContext(ctx) + "\n\nLegs nel JSON: " + legsContext;
+  return await callApi(apiKey, sys, user, 5000);
+}
+
+function mergeAccommodationIntoLegs(baseJson, partialJson) {
+  if (!partialJson || !partialJson.legs) return;
+  for (var i = 0; i < baseJson.legs.length; i++) {
+    var legId = baseJson.legs[i].id;
+    var match = (partialJson.legs || []).find(function(l) { return l.id === legId; });
+    if (match && match.accommodation) {
+      /* Preserve existing confirmed_item / booking_ref if already set */
+      var existing = baseJson.legs[i].accommodation || {};
+      baseJson.legs[i].accommodation = Object.assign({}, match.accommodation, {
+        confirmed_item: existing.confirmed_item || null,
+        booking_ref: existing.booking_ref || null,
+        booking_url: existing.booking_url || null
+      });
+    }
+  }
+}
+
+/* ============================================================
+   CALL 3 — EXCURSIONS + MUSEUMS + PARKS
+   ============================================================ */
+async function callExcursions(apiKey, ctx, baseJson) {
+  var numLegs = (baseJson.legs || []).length;
+  /* Per tour con molte tappe, limita output per evitare max_tokens */
+  var excPerLeg = numLegs <= 2 ? "4-8" : (numLegs <= 4 ? "3-5" : "2-4");
+  var sf = (ctx.subFilters && ctx.subFilters.excursions) || { cats: [], extra: {} };
+  var catMap = { nature:"natura/panoramico", trekking:"trekking/hiking", adventure:"sport avventura", water:"attivita acquatiche", religious:"religioso/spirituale", wildlife:"fauna selvatica" };
+  var catFilter = sf.cats.length ? sf.cats.map(function(c) { return catMap[c] || c; }).join(", ") : "qualsiasi tipo";
+  var durationFilter = sf.extra.duration === "day" ? "Solo escursioni in giornata (no pernottamento)\n" : (sf.extra.duration === "overnight" ? "Solo escursioni con pernottamento (1+ notti)\n" : "");
+  var difficultyFilter = sf.extra.difficulty === "easy" ? "Solo difficolta' easy\n" : (sf.extra.difficulty === "easy_medium" ? "Solo difficolta' easy o medium, niente hard\n" : "");
+
+  var sys = SYSTEM_JSON_ONLY + "\n\nGenera escursioni FUORI CITTÀ' e parchi naturali per ogni tappa. Restituisci:\n" +
+    "{\n" +
+    '  "legs": [ { "id":"LEGID", "excursions":[ { "id":"exc_LEGID_01", "name":"...", "type":"nature|adventure|trekking|scenic|religious|other", "duration_hours":0, "difficulty":"easy|medium|hard", "lat":0.0, "lng":0.0, "permit_required":false, "permit_notes":"", "best_time":"...", "source":"ai_generated", "source_label":"AI", "confidence":"medium", "conflict":null, "notes":"", "url":"" } ], "museums":[ { "id":"mus_LEGID_01", "name":"...", "lat":0.0, "lng":0.0, "free":false, "price_approx":"...", "hours":"...", "source":"ai_generated", "confidence":"medium", "conflict":null, "notes":"", "url":"" } ], "parks":[ { "id":"park_LEGID_01", "name":"...", "lat":0.0, "lng":0.0, "type":"...", "source":"ai_generated", "confidence":"medium", "notes":"", "url":"" } ] } ]\n' +
+    "}\n\nRegole CRITICHE:\n" +
+    "- excursions = SOLO gite fuori citta': trekking, laghi, montagne, cascate, villaggi rurali, riserve naturali. NEVER monuments, squares, churches or urban attractions.\n" +
+    "- Urban attractions (monumenti, chiese, piazze, quartieri storici) vanno in una chiamata separata — NON includerle qui\n" +
+    "- Categorie richieste dall'utente: " + catFilter + " — concentrati SOLO su queste categorie\n" +
+    durationFilter + difficultyFilter +
+    "- Focus: " + (ctx.focusTags.length ? ctx.focusTags.join(", ") : "natura e avventura") + "\n" +
+    "- Excursions: " + excPerLeg + " per tappa (IMPORTANT: rispetta questo limite)\n" +
+    "- Permits: ALWAYS flag if an area requires special permits (e.g. ILP Ladakh, PAP Sikkim)\n" +
+    "- Parks vuoto se non applicabile\n" +
+    "- notes e url: stringa vuota se non disponibile — NON omettere i campi\n" +
+    "- Tutti i testi in lingua: " + ctx.lang;
+
+  var legsContext = (baseJson.legs || []).map(function(l) { return l.id + ": " + l.name; }).join(", ");
+  var user = buildTripContext(ctx) + "\n\nLegs: " + legsContext;
+  /* 8000 tokens per tour lunghi, 6000 per itinerari brevi */
+  return await callApi(apiKey, sys, user, numLegs > 3 ? 8000 : 6000);
+}
+
+/* ============================================================
+   CALL 3b — ATTRACTIONS (attrazioni urbane)
+   ============================================================ */
+async function callAttractions(apiKey, ctx, baseJson) {
+  var numLegs = (baseJson.legs || []).length;
+  var perLeg = numLegs <= 2 ? "5-8" : (numLegs <= 4 ? "4-6" : "3-5");
+  var sf = (ctx.subFilters && ctx.subFilters.attractions) || { cats: [] };
+  var typeFilter = sf.cats.length ? "Genera SOLO questi tipi: " + sf.cats.join(", ") + "\n" : "";
+
+  var sys = SYSTEM_JSON_ONLY + "\n\nGenera attrazioni urbane per ogni tappa. Restituisci:\n" +
+    "{\n" +
+    "  \"legs\": [ { \"id\":\"LEGID\", \"attractions\": [ { \"id\":\"att_LEGID_01\", \"name\":\"...\", \"type\":\"monument|square|church|neighborhood|viewpoint|market|other\", \"lat\":0.0, \"lng\":0.0, \"free\":true, \"price_approx\":\"\", \"hours\":\"\", \"duration_hours\":1, \"description\":\"Breve descrizione\", \"source\":\"ai_generated\", \"confidence\":\"medium\", \"notes\":\"\", \"url\":\"\" } ] } ]\n" +
+    "}\n\n" +
+    "Regole CRITICHE:\n" +
+    "- attractions = attrazioni dentro la citta: monumenti, piazze storiche, chiese, quartieri caratteristici, belvedere, mercati AND MUSEUMS/GALLERIES\n" +
+    "- type: usa 'museum' per musei e gallerie d'arte, 'monument' per statue e monumenti, 'church' per chiese e luoghi di culto, 'square' per piazze, 'neighborhood' per quartieri, 'viewpoint' per belvedere, 'market' per mercati\n" +
+    "- NON includere escursioni fuori citta, trekking o natura (quelle vanno in excursions)\n" +
+    typeFilter +
+    "- " + perLeg + " attrazioni per tappa\n" +
+    "- Real and precise coordinates\n" +
+    "- free:true se ingresso gratuito, altrimenti price_approx con prezzo es. '10 EUR'\n" +
+    "- hours: orari di apertura se rilevanti, stringa vuota se sempre accessibile\n" +
+    "- Tutti i testi in lingua: " + ctx.lang;
+  var legsContext = (baseJson.legs || []).map(function(l) { return l.id + ": " + l.name; }).join(", ");
+  var user = buildTripContext(ctx) + "\n\nLegs: " + legsContext;
+  return await callApi(apiKey, sys, user, numLegs > 3 ? 6000 : 4000);
+}
+
+function mergeAttractionsIntoLegs(baseJson, partialJson) {
+  if (!partialJson || !partialJson.legs) return;
+  partialJson.legs.forEach(function(pl) {
+    var leg = (baseJson.legs || []).find(function(l) { return l.id === pl.id; });
+    if (leg && pl.attractions) leg.attractions = pl.attractions;
+  });
+}
+
+/* ============================================================
+   CALL 4a — LOGISTICS ONLY
+   ============================================================ */
+async function callLogistics(apiKey, ctx, baseJson) {
+  var sf = (ctx.subFilters && ctx.subFilters.logistics) || { cats: [] };
+  var catMap = { metro:"metro/metropolitana", bus:"bus urbano", taxi:"taxi/ride-share", sim:"SIM/internet", money:"denaro/ATM", health:"salute", safety:"sicurezza", permits:"permessi" };
+  var catFilter = sf.cats.length ? "Concentrati SOLO su queste sotto-categorie: " + sf.cats.map(function(c) { return catMap[c] || c; }).join(", ") + " (oltre ai contatti emergenza, sempre obbligatori)\n" : "";
+
+  var sys = SYSTEM_JSON_ONLY + "\n\nGenera la logistica pratica per ogni tappa E i contatti di emergenza per il viaggio. Restituisci:\n" +
+    '{ "legs": [ { "id":"LEGID", "logistics":[ { "id":"log_LEGID_01", "category":"local_transport|health|money|connectivity|permits|safety|other", "title":"...", "body":"testo informativo completo", "source":"ai_generated", "source_label":"AI", "confidence":"medium", "conflict":null, "notes":"", "url":"" } ] } ], "emergency_contacts": [ { "label":"...", "phone":"...", "notes":"" } ] }' +
+    "\n\nRegole:\n- Copri SEMPRE: local_transport (vedi sotto), salute, soldi/ATM, connettivita, sicurezza, permessi\n" +
+    "- category 'local_transport' = SOLO trasporti DENTRO la città/area (metro, bus urbano, tram, taxi locali, app di ride-sharing, noleggio bici/scooter, come comprare biglietti). NON i trasporti A/R da casa, quelli sono gestiti separatamente.\n" +
+    "- Per local_transport crea ALMENO 2 voci separate se la città ha piu' di un'opzione (es. una voce per metro/bus, una per taxi/app)\n" +
+    catFilter +
+    "- 5-7 voci per tappa (includendo almeno 2 di local_transport)\n" +
+    "- Testi concisi ma completi e pratici (es. nomi di app, prezzi indicativi biglietti, dove comprarli)\n" +
+    "- emergency_contacts: genera 4-6 contatti REALI e SPECIFICI per il/i paese/i di destinazione del viaggio (non genericamente 'EU 112'). Includi SEMPRE: numero unico di emergenza locale, polizia, ambulanza/pronto soccorso, e l'ambasciata o consolato del paese di partenza (" + (ctx.homeBase || "Italia") + ") nel paese di destinazione se esiste. Se il paese e' nell'Unione Europea, 112 e' corretto come numero unico ma aggiungi comunque polizia/ambulanza specifici se diversi.\n" +
+    "- Travellers: " + (ctx.travelers || "non specificato") + "\n- Lingua: " + ctx.lang;
+  var legsContext = (baseJson.legs || []).map(function(l) { return l.id + ": " + l.name; }).join(", ");
+  var user = buildTripContext(ctx) + "\n\nLegs: " + legsContext + "\nPaese/base di partenza: " + (ctx.homeBase || "non specificato");
+  return await callApi(apiKey, sys, user, 6000);
+}
+
+/* ============================================================
+   CALL 4b — EVENTS + ZONES
+   ============================================================ */
+async function callAreas(apiKey, ctx, baseJson) {
+  var sf = (ctx.subFilters && ctx.subFilters.events) || { cats: [] };
+  var catMap = { festival:"festival/fiere", concert:"concerti/musica", market_event:"mercati/eventi stagionali", sport:"eventi sportivi" };
+  var eventFilter = sf.cats.length ? "Eventi richiesti dall'utente: SOLO " + sf.cats.map(function(c) { return catMap[c] || c; }).join(", ") + "\n" : "";
+
+  var sys = SYSTEM_JSON_ONLY + "\n\nGenera eventi locali e zone/quartieri per ogni tappa. Restituisci:\n" +
+    '{ "legs": [ { "id":"LEGID", "events":[ { "id":"evt_LEGID_01", "name":"...", "date_from":"YYYY-MM-DD", "date_to":"YYYY-MM-DD", "location":"...", "lat":0.0, "lng":0.0, "source":"ai_generated", "source_label":"AI", "confidence":"low", "notes":"", "url":"" } ], "zones":[ { "id":"zone_LEGID_01", "name":"...", "type":"neighborhood|district|village|other", "lat":0.0, "lng":0.0, "description":"...", "source":"ai_generated", "confidence":"medium" } ] } ] }' +
+    "\n\nRegole:\n- Areas: 3-4 per tappa con coordinate reali\n" + eventFilter + "- Events: 1-2 max, confidence low\n- Lingua: " + ctx.lang;
+  var legsContext = (baseJson.legs || []).map(function(l) { return l.id + ": " + l.name; }).join(", ");
+  var user = buildTripContext(ctx) + "\n\nLegs: " + legsContext;
+  return await callApi(apiKey, sys, user, 4000);
+}
+
+/* ============================================================
+   CALL 5 — CALENDAR
+   ============================================================ */
+async function callCalendar(apiKey, ctx, baseJson) {
+  var legsSummary = (baseJson.legs || []).map(function(l) {
+    return l.id + " (" + l.name + ", " + l.schedule.days_count + "gg, da:" + l.schedule.date_from + ", colore:" + l.color + ")";
+  }).join(" | ");
+
+  var excSample = {};
+  (baseJson.legs || []).forEach(function(l) {
+    var items = [];
+    (l.excursions || []).slice(0, 4).forEach(function(e) { items.push({ name: e.name, id: e.id, type: "excursion", duration_hours: e.duration_hours }); });
+    (l.attractions || []).slice(0, 3).forEach(function(a) { items.push({ name: a.name, id: a.id, type: "attraction" }); });
+    (l.restaurants || []).slice(0, 3).forEach(function(r) { items.push({ name: r.name, id: r.id, type: "restaurant" }); });
+    excSample[l.id] = items;
+  });
+
+  var style = ctx.calendarStyle || "strutturato";
+  var slotFormat = "";
+  if (style === "sintetico") {
+    slotFormat = "Slots come STRINGHE SEMPLICI: \"morning\":\"testo\", \"lunch\":\"testo\", ecc.";
+  } else if (style === "strutturato") {
+    slotFormat = "Slots come OGGETTI con items: \"morning\":{ \"text\":\"Sommario mattina\", \"items\":[ { \"time\":\"09:00\", \"activity\":\"Nome attivita\", \"duration_min\":60, \"description\":\"\", \"url\":\"\", \"booking_required\":false } ] }. Includi 2-5 items per slot con orari realistici.";
+  } else {
+    slotFormat = "Slots come OGGETTI con items DETTAGLIATI: \"morning\":{ \"text\":\"Sommario\", \"items\":[ { \"time\":\"09:00\", \"activity\":\"Nome\", \"duration_min\":60, \"description\":\"Descrizione completa con info pratiche, prezzi, consigli\", \"url\":\"https://...\" se disponibile, \"booking_required\":true|false } ] }. 3-6 items per slot con descrizioni ricche.";
+  }
+
+  var journeyDates = "";
+  if (ctx.journeys && ctx.journeys.length) {
+    journeyDates = "GIORNI CON JOURNEY (gia di tipo transfer): " + ctx.journeys.map(function(j) {
+      return j.date + " (" + j.label + ": " + j.segments.map(function(s) { return s.from + "->" + s.to; }).join(", ") + ")";
+    }).join(" | ") + ". Per questi days usa journey_refs:[\"" + (ctx.journeys[0] || {id:""}).id + "\"] e type:transfer.";
+  }
+
+  var sys = SYSTEM_JSON_ONLY + "\n\nGenera il calendario giornaliero v1.1. Restituisci:\n" +
+    "{ \"calendar\": { \"YYYY-MM-DD\": { \"leg_id\":\"...\", \"leg_color\":\"#hex\", \"type\":\"normal|transfer|rest|flexible\", \"journey_refs\":[], \"slots\":{ FORMAT_SLOTS }, \"transport_ref\":null, \"accommodation_ref\":\"acc_ID_o_null\" } } }\n\n" +
+    "SLOT FORMAT: " + slotFormat + "\n\n" +
+    "TIMING RULE (IMPORTANT): within the same slot, each item's start time must equal the previous item's start time + its duration_min. No gaps, no overlaps. Example: item 1 time=09:00 duration_min=90 -> item 2 time must be 10:30. The only exception is a deliberate short break (max 15 min) which you can fold into the previous item's duration_min instead of leaving it implicit.\n\n" +
+    "MANDATORY SLOT NAMES (use EXACTLY these 5 keys, no others):\n" +
+    "- \"morning\" = morning activities\n" +
+    "- \"lunch\" = lunch break\n" +
+    "- \"afternoon\" = afternoon activities\n" +
+    "- \"dinner\" = evening meal\n" +
+    "- \"evening\" = after dinner / nightlife\n" +
+    "NEVER use 'night', 'notte', 'meal' or other names.\n\n" +
+    "LINKING ITEMS: When an item in a slot corresponds to an excursion, attraction or restaurant from AVAILABLE CONTENT, add the matching _excursion_id, _attraction_id or _restaurant_id field to the item object. Example: { \"time\":\"09:00\", \"activity\":\"Lago Gurudongmar\", \"duration_min\":600, \"_excursion_id\":\"exc_sikkim_north_01\", ... }\n\n" +
+    "RESTAURANTS IN SLOTS:\n" +
+    "- Slot 'lunch': add a restaurant from the list as lunch activity with _restaurant_id\n" +
+    "- Slot 'dinner': add a restaurant from the list as dinner activity with _restaurant_id\n\n" +
+    (journeyDates ? journeyDates + "\n\n" : "") +
+    "RULES:\n- One key for EVERY day from " + ctx.startDate + " to " + ctx.endDate + " (" + ctx.totalDays + " days)\n" +
+    "- leg_id and leg_color: from the active leg that day\n" +
+    "- Empty slot: empty string or items:[]\n" +
+    "- Distribute excursions in morning/afternoon slots (use real names from available content)\n" +
+    "- accommodation_ref: point to the accommodation option ID (acc_LEGID_01) for all overnight days EXCEPT the check-out day (last day of leg). On check-out day set null.\n" +
+    "- Focus: " + (ctx.focusTags.length ? ctx.focusTags.join(", ") : "balanced") + "\n" +
+    "- All text in language: " + ctx.lang + "\n\n" +
+    "LEGS WITH DATES:\n" + legsSummary + "\n\nAVAILABLE CONTENT (use these ids for linking):\n" + JSON.stringify(excSample);
+
+  var user = buildTripContext(ctx);
+  return await callApi(apiKey, sys, user, 8000);
+}
+
+/* ============================================================
+   FREE MODE GENERATION (no API)
+   ============================================================ */
+function startFreeGeneration() {
+  var title = document.getElementById("trip-title").value.trim() || "My Trip";
+  var startDate = document.getElementById("trip-start").value;
+  var endDate = document.getElementById("trip-end").value;
+  var homeBase = document.getElementById("trip-home").value.trim() || "Casa";
+  var currency = document.getElementById("trip-currency").value;
+  var lang = document.getElementById("trip-lang").value;
+  var tripType = document.querySelector("input[name='trip-type']:checked").value;
+  var totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000) + 1;
+  var sections = [];
+  document.querySelectorAll(".section-check:checked").forEach(function(el) { sections.push(el.value); });
+
+  hideError();
+  showProgress();
+  document.getElementById("btn-generate").disabled = true;
+
+  log("> Mode FREE — costruzione JSON da file locali...");
+  setProgressBar(20);
+
+  /* Build JSON from ctx + extracted items */
+  var freeJson = {
+    meta: {
+      schema_version: "1.1", title: title,
+      generated_at: new Date().toISOString(),
+      language: lang, trip_type: tripType,
+      calendar_style: (document.querySelector("input[name='cal-style']:checked") || {}).value || "sintetico",
+      enabled_sections: sections,
+      offline_mode: true,
+      sources_used: (function() {
+        var s = [];
+        if (sourcePdfs.length > 0) s.push("pdf_extract");
+        if (sourceCsvs.length > 0) s.push("csv_import");
+        if (sourceTexts.length > 0) s.push("txt_import");
+        return s;
+      })(),
+    },
+    trip: {
+      start_date: startDate, end_date: endDate,
+      total_days: totalDays, home_base: homeBase,
+      currency: currency, currency_secondary: null,
+      emergency_contacts: [], global_notes: ""
+    },
+    journeys: buildJourneysPayload(),
+    legs: legs.map(function(l, i) {
+      return {
+        id: l.name.toLowerCase().replace(/[^a-z0-9]/g,"_") || ("leg_" + (i+1)),
+        name: l.name, order: i+1, color: l.color,
+        schedule: { mode: l.mode, date_from: l.dateFrom || startDate, date_to: null, days_count: l.days, days_min: null, days_max: null },
+        geo: { center_lat: null, center_lng: null, zoom_default: 13, map_files: [] },
+        transport_in: null,
+        accommodation: { confirmed_item: null, booking_ref: null, booking_url: null, check_in: startDate, check_out: endDate, options: [] },
+        restaurants: [], excursions: [], museums: [], parks: [], events: [], logistics: [], zones: [],
+        notes_free: ""
+      };
+    }),
+    calendar: {},
+    conflicts: [],
+    user_overrides: { "_note": "User edits.", journeys:{}, calendar:{}, restaurants:{}, excursions:{}, museums:{}, parks:{}, events:{}, logistics:{}, accommodation:{}, zones:{}, conflicts:{} }
+  };
+
+  /* Merge extracted items */
+  if (extractedItems.length > 0) {
+    mergeExtractedIntoJson(freeJson, extractedItems, { legs: legs });
+    log("  \u2713 " + extractedItems.length + " elementi da file mergiati");
+  }
+  if (sourceCsvs.length > 0) {
+    var csvItems = [];
+    sourceCsvs.forEach(function(csv) {
+      parseCsvFromText(csv.text, csv.label).forEach(function(item) { csvItems.push(item); });
+    });
+    if (csvItems.length > 0) {
+      mergeExtractedIntoJson(freeJson, csvItems, { legs: legs });
+      log("  \u2713 " + csvItems.length + " elementi da CSV mergiati");
+    }
+  }
+  if (sourceTexts.length > 0) {
+    var combinedText = sourceTexts.map(function(t) { return "--- " + t.name + " ---\n" + t.text; }).join("\n\n");
+    freeJson.trip.global_notes = (freeJson.trip.global_notes ? freeJson.trip.global_notes + "\n\n" : "") + combinedText;
+    log("  \u2713 " + sourceTexts.length + " file TXT/MD aggiunti come note generali");
+  }
+
+  setProgressBar(100);
+  log("  \u2713 JSON creato — " + (JSON.stringify(freeJson).length) + " characters");
+  log("  \u26a0 Free mode: AI coordinates and details not available.");
+  log("  Per completare il planner apri i file nel planner e aggiungi dati manualmente.");
+
+  generatedJson = freeJson;
+  showResult(freeJson, { title: title, startDate: startDate });
+  document.getElementById("btn-generate").disabled = false;
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+init();
+</script>
+<!-- HELP MODAL -->
+<div class="help-overlay" id="helpOverlay" onclick="closeHelpOnBg(event)">
+  <div class="help-modal">
+    <button class="help-close" onclick="toggleHelpModal()">✕ Chiudi</button>
+    <div class="help-title">🗺️ How to use the Travel Planner Generator</div>
+    <div class="help-version">Schema v1.1 · Generator v10.0 · Planner v7.0</div>
+
+    <div class="help-section">
+      <div class="help-section-title">Flusso di lavoro</div>
+      <div class="help-step">
+        <div class="help-step-num">0</div>
+        <div class="help-step-body">
+          <div class="help-step-title">Add A/R transport (optional)</div>
+          <div class="help-step-desc">If you have already booked flights or trains, add them here. Travel days automatically become "transfer" days in the calendar. You can add multiple segments for connecting flights.</div>
+        </div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">1</div>
+        <div class="help-step-body">
+          <div class="help-step-title">Configure the trip</div>
+          <div class="help-step-desc">Enter title, dates, trip type (single city / multi-city / tour) and legs. Choose the sections to include in the planner. For multi-leg tours add one leg per destination with the expected number of days.</div>
+        </div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">2</div>
+        <div class="help-step-body">
+          <div class="help-step-title">Choose style and preferences</div>
+          <div class="help-step-desc"><strong>Concise</strong> — generates slots with free text, ideal for flexibility.<br><strong>Structured</strong> — generates activities with times for each slot (recommended).<br><strong>Detailed</strong> — adds descriptions, prices and links for each activity (uses more tokens).</div>
+        </div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">3</div>
+        <div class="help-step-body">
+          <div class="help-step-title">Enter the API key and generate</div>
+          <div class="help-step-desc">You need an account on <strong>console.anthropic.com</strong> with credit ($5 covers many tests). The key is only used in this browser session and is never saved. Generation makes 5-6 API calls in sequence.</div>
+        </div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">4</div>
+        <div class="help-step-body">
+          <div class="help-step-title">Download JSON and open it in the Planner</div>
+          <div class="help-step-desc">After generation, download the JSON and drag it into <strong>planner_template_v7.html</strong>. The planner works offline — no server, no account, all data in the browser.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Estimated API cost</div>
+      <div class="help-tip">
+        <strong>Concise:</strong> ~$0.03–0.08 for a simple trip<br>
+        <strong>Structured:</strong> ~$0.08–0.18 (recommended)<br>
+        <strong>Detailed:</strong> ~$0.15–0.35<br>
+        Cost increases with the number of legs and sections enabled.
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">In the Planner — what you can do</div>
+      <div class="help-shortcut-grid">
+        <div class="help-shortcut">📅 <strong>Calendar</strong> — click a day to see the slots. ✏️ to edit the text.</div>
+        <div class="help-shortcut">✈️ <strong>Journeys</strong> — confirm bookings with the green button.</div>
+        <div class="help-shortcut">🗺️ <strong>Map</strong> — filter layers by category. Click 🗺️ on any card to center the map.</div>
+        <div class="help-shortcut">📝 <strong>Personal notes</strong> — every card has a 📝 button to add notes. Saved in the browser.</div>
+        <div class="help-shortcut">🏨 <strong>Accommodation</strong> — select "Confirm booking" to mark the chosen hotel.</div>
+        <div class="help-shortcut">🌙 <strong>Dark / Light</strong> — toggle in the top right. Preference saved in the browser.</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Notes on AI-generated data</div>
+      <div class="help-tip">
+        AI-generated data (restaurants, hours, prices, coordinates) has <strong>medium/low</strong> confidence.
+        Always verify before travelling: opening hours, updated prices, booking requirements.
+        Coordinates are generally accurate but may have small offsets — use as a starting point.
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Versions</div>
+      <div class="help-tip">
+        <strong>Schema v1.1</strong> — adds A/R journeys and structured calendar slots<br>
+        <strong>Generator v10.0</strong> — Step 0 journey builder, calendar style, category sub-filters, schema v1.1 output<br>
+        <strong>Planner v7.0</strong> — Journeys tab, segment timeline, concise/structured/detailed toggle, swap-day arrows<br>
+        <strong>Coming soon:</strong> PDF and URL ingestion (Phase 3), ticket upload from email
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
