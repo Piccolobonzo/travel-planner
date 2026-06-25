@@ -1866,6 +1866,14 @@ async function extractPdfTextAndParse(dot, msg, preview) {
     allExtracted = allExtracted.concat(items);
   });
 
+  /* Parse TXT/MD files via heuristic parser */
+  if (typeof sourceTexts !== "undefined") {
+    sourceTexts.forEach(function(txt) {
+      var items = heuristicParse(txt.text || txt.content || "", txt.label || txt.name || "file");
+      allExtracted = allExtracted.concat(items);
+    });
+  }
+
   extractedItems = allExtracted;
 
   if (allExtracted.length > 0) {
@@ -5182,6 +5190,14 @@ async function extractPdfTextAndParse(dot, msg, preview) {
     var items = parseCsvFromText(csv.text, csv.label);
     allExtracted = allExtracted.concat(items);
   });
+
+  /* Parse TXT/MD files via heuristic parser */
+  if (typeof sourceTexts !== "undefined") {
+    sourceTexts.forEach(function(txt) {
+      var items = heuristicParse(txt.text || txt.content || "", txt.label || txt.name || "file");
+      allExtracted = allExtracted.concat(items);
+    });
+  }
 
   extractedItems = allExtracted;
 
