@@ -1013,8 +1013,9 @@
 
       <!-- Generate button -->
       <div class="generate-section">
-        <div style="text-align:center;margin-bottom:12px;font-size:13px;color:var(--text2);">
-          Non hai un codice? <a href="#" onclick="closeGenOverlay();openEmailPopup();return false;" style="color:var(--accent);font-weight:600;">Ottieni 3 generazioni gratis</a> oppure <a href="#prezzi" onclick="closeGenOverlay();return false;" style="color:var(--accent);font-weight:600;">acquista un pacchetto</a>
+        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+          <button onclick="closeGenOverlay();openEmailPopup();return false;" style="flex:1;min-width:180px;background:#10b981;color:#fff;border:none;padding:0.7rem 1rem;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer;">🎁 Ottieni 3 generazioni gratis</button>
+          <button onclick="closeGenOverlay();document.getElementById('prezzi').scrollIntoView({behavior:'smooth'});return false;" style="flex:1;min-width:180px;background:rgba(255,255,255,0.06);color:#ddd;border:1px solid rgba(255,255,255,0.12);padding:0.7rem 1rem;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;">💳 Acquista un pacchetto</button>
         </div>
         <button class="btn-generate" id="btn-generate" onclick="startGeneration()">
           🚀 Generate planner
@@ -1693,7 +1694,7 @@ function onModeChange() {
 
   document.getElementById("section-files").style.display  = needFiles ? "block" : "none";
   document.getElementById("section-urls").style.display   = needUrl   ? "block" : "none";
-  document.getElementById("section-apikey").style.display = needApi   ? "block" : "none";
+  document.getElementById("section-apikey").style.display = "block";
   document.getElementById("section-cost").style.display   = needApi   ? "block" : "none";
   document.getElementById("free-parse-preview").style.display = isFree && (sourcePdfs.length > 0 || sourceCsvs.length > 0) ? "block" : "none";
 
@@ -2209,12 +2210,14 @@ function updateGenerateBtn() {
   if (!btn) return;
   var isMock = !!(document.getElementById("mock-mode-toggle") && document.getElementById("mock-mode-toggle").checked);
   if (isMock) { btn.disabled = false; return; }
+  var code = (document.getElementById("access-code") || {}).value || "";
+  var hasCode = code.length >= 3;
   var mode = getGenMode();
   if (mode === "free") {
-    btn.disabled = (sourcePdfs.length === 0 && sourceCsvs.length === 0 && sourceTexts.length === 0);
+    var hasFiles = (sourcePdfs.length > 0 || sourceCsvs.length > 0 || sourceTexts.length > 0);
+    btn.disabled = !hasCode || !hasFiles;
   } else {
-    var code = (document.getElementById("access-code") || {}).value || "";
-    btn.disabled = code.length < 3;
+    btn.disabled = !hasCode;
   }
 }
 
@@ -5008,7 +5011,7 @@ function onModeChange() {
 
   document.getElementById("section-files").style.display  = needFiles ? "block" : "none";
   document.getElementById("section-urls").style.display   = needUrl   ? "block" : "none";
-  document.getElementById("section-apikey").style.display = needApi   ? "block" : "none";
+  document.getElementById("section-apikey").style.display = "block";
   document.getElementById("section-cost").style.display   = needApi   ? "block" : "none";
   document.getElementById("free-parse-preview").style.display = isFree && (sourcePdfs.length > 0 || sourceCsvs.length > 0) ? "block" : "none";
 
@@ -5524,12 +5527,14 @@ function updateGenerateBtn() {
   if (!btn) return;
   var isMock = !!(document.getElementById("mock-mode-toggle") && document.getElementById("mock-mode-toggle").checked);
   if (isMock) { btn.disabled = false; return; }
+  var code = (document.getElementById("access-code") || {}).value || "";
+  var hasCode = code.length >= 3;
   var mode = getGenMode();
   if (mode === "free") {
-    btn.disabled = (sourcePdfs.length === 0 && sourceCsvs.length === 0 && sourceTexts.length === 0);
+    var hasFiles = (sourcePdfs.length > 0 || sourceCsvs.length > 0 || sourceTexts.length > 0);
+    btn.disabled = !hasCode || !hasFiles;
   } else {
-    var code = (document.getElementById("access-code") || {}).value || "";
-    btn.disabled = code.length < 3;
+    btn.disabled = !hasCode;
   }
 }
 
