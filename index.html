@@ -195,32 +195,69 @@
   <div class="section-label">Prezzi</div>
   <h2 class="section-title">Semplice e trasparente</h2>
   <p class="section-sub">Paghi solo le generazioni che usi. Nessun abbonamento, nessun rinnovo automatico.</p>
-  <div class="pricing-cards">
+
+  <!-- Messaggio codice post-pagamento -->
+  <div id="payment-result" style="display:none;max-width:600px;margin:0 auto 2rem;background:rgba(62,207,142,0.1);border:2px solid #3ecf8e;border-radius:14px;padding:1.8rem;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:0.5rem;">🎉</div>
+    <div style="font-size:1.1rem;font-weight:700;color:#3ecf8e;margin-bottom:0.5rem;">Pagamento completato!</div>
+    <div style="color:#aaa;font-size:0.9rem;margin-bottom:1rem;">Il tuo codice di accesso è:</div>
+    <div id="payment-code" style="font-family:monospace;font-size:1.6rem;font-weight:900;color:#fff;background:rgba(0,0,0,0.3);padding:0.8rem 1.5rem;border-radius:8px;letter-spacing:2px;margin-bottom:1rem;"></div>
+    <div style="color:#888;font-size:0.82rem;margin-bottom:1.2rem;">⚠️ Salva questo codice — ti servirà ogni volta che generi un viaggio. Non verrà inviato via email.</div>
+    <button onclick="useCodeNow()" style="background:#6c63ff;color:#fff;border:none;padding:0.8rem 2rem;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;">Usa subito → Apri Generator</button>
+  </div>
+
+  <div id="payment-cancelled" style="display:none;max-width:500px;margin:0 auto 2rem;background:rgba(224,85,85,0.08);border:1px solid rgba(224,85,85,0.4);border-radius:14px;padding:1.2rem;text-align:center;color:#e05555;font-size:0.9rem;">
+    Pagamento annullato. Nessun addebito è stato effettuato.
+  </div>
+
+  <div class="pricing-cards" style="max-width:1000px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));">
     <div class="pricing-card">
       <h3>Prova</h3>
-      <div class="price">Gratis <span></span></div>
-      <div class="price-desc">1 generazione di prova</div>
+      <div class="price">Gratis</div>
+      <div class="price-desc">Solo file caricati, senza AI</div>
       <ul class="price-features">
-        <li>1 viaggio singola città</li>
-        <li>Fino a 5 giorni</li>
-        <li>Tutte le sezioni incluse</li>
-        <li>File HTML scaricabile</li>
+        <li>Upload PDF / CSV / TXT</li>
+        <li>Generazioni illimitate</li>
+        <li>Nessuna carta richiesta</li>
       </ul>
       <a href="#" class="btn-primary" style="display:block;text-align:center;" onclick="openGenOverlay();return false;">Inizia gratis</a>
     </div>
-    <div class="pricing-card featured">
-      <div class="featured-badge">PIÙ POPOLARE</div>
-      <h3>Pacchetto</h3>
-      <div class="price">€5 <span>/ 5 generazioni</span></div>
-      <div class="price-desc">€1 per viaggio generato</div>
+    <div class="pricing-card">
+      <h3>Base</h3>
+      <div class="price">€4,90 <span>/ 5 generazioni</span></div>
+      <div class="price-desc">€0,98 per viaggio</div>
       <ul class="price-features">
-        <li>Viaggi illimitati per durata</li>
-        <li>Multi-città e tour</li>
-        <li>Upload PDF e CSV</li>
-        <li>Priorità nella generazione</li>
+        <li>5 viaggi con AI completa</li>
+        <li>Singola città e multi-città</li>
+        <li>File HTML scaricabile</li>
         <li>Validità 12 mesi</li>
       </ul>
-      <a href="#" class="btn-primary" style="display:block;text-align:center;">Acquista →</a>
+      <button onclick="startCheckout('price_1Tm8uWCd7AUsKJBwlx6aVAay')" class="btn-primary" style="display:block;width:100%;text-align:center;border:none;cursor:pointer;">Acquista →</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="featured-badge">PIÙ POPOLARE</div>
+      <h3>Standard</h3>
+      <div class="price">€8,90 <span>/ 12 generazioni</span></div>
+      <div class="price-desc">€0,74 per viaggio</div>
+      <ul class="price-features">
+        <li>12 viaggi con AI completa</li>
+        <li>Tour multi-tappa</li>
+        <li>Upload PDF e CSV</li>
+        <li>Validità 12 mesi</li>
+      </ul>
+      <button onclick="startCheckout('price_1Tm8vVCd7AUsKJBwsB3NTudO')" class="btn-primary" style="display:block;width:100%;text-align:center;border:none;cursor:pointer;">Acquista →</button>
+    </div>
+    <div class="pricing-card">
+      <h3>Pro</h3>
+      <div class="price">€14,90 <span>/ 25 generazioni</span></div>
+      <div class="price-desc">€0,60 per viaggio</div>
+      <ul class="price-features">
+        <li>25 viaggi con AI completa</li>
+        <li>Tutte le funzionalità</li>
+        <li>Upload PDF e CSV</li>
+        <li>Validità 12 mesi</li>
+      </ul>
+      <button onclick="startCheckout('price_1Tm8wPCd7AUsKJBw3JTfFLrE')" class="btn-primary" style="display:block;width:100%;text-align:center;border:none;cursor:pointer;">Acquista →</button>
     </div>
   </div>
 </section>
@@ -4171,6 +4208,91 @@ function closeGenOverlay() {
   document.getElementById("gen-overlay").style.display = "none";
   document.body.classList.remove("gen-open");
 }
+
+/* ============================================================
+   STRIPE CHECKOUT
+   ============================================================ */
+var TRIPCRAFT_API = "https://tripcraft-api-nu.vercel.app";
+
+async function startCheckout(priceId) {
+  var btn = event.target;
+  var origText = btn.textContent;
+  btn.textContent = "Caricamento...";
+  btn.disabled = true;
+  try {
+    var res = await fetch(TRIPCRAFT_API + "/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        price_id: priceId,
+        origin: window.location.origin + window.location.pathname
+      })
+    });
+    var data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Errore: " + (data.error || "impossibile avviare il pagamento"));
+      btn.textContent = origText;
+      btn.disabled = false;
+    }
+  } catch(e) {
+    alert("Errore di rete. Riprova.");
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
+/* ============================================================
+   CONFERMA PAGAMENTO (al ritorno da Stripe)
+   ============================================================ */
+async function handlePaymentReturn() {
+  var params = new URLSearchParams(window.location.search);
+  var payment = params.get("payment");
+  var sessionId = params.get("session_id");
+
+  if (payment === "cancelled") {
+    document.getElementById("payment-cancelled").style.display = "block";
+    document.getElementById("prezzi").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  if (payment === "success" && sessionId) {
+    try {
+      var res = await fetch(TRIPCRAFT_API + "/api/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      var data = await res.json();
+      if (data.code) {
+        document.getElementById("payment-code").textContent = data.code;
+        document.getElementById("payment-result").style.display = "block";
+        /* Pulisce URL senza ricaricare la pagina */
+        window.history.replaceState({}, "", window.location.pathname);
+        document.getElementById("prezzi").scrollIntoView({ behavior: "smooth" });
+      }
+    } catch(e) {
+      console.error("Errore conferma pagamento:", e);
+    }
+  }
+}
+
+function useCodeNow() {
+  var code = document.getElementById("payment-code").textContent;
+  openGenOverlay();
+  /* Precompila il campo codice nel generator */
+  setTimeout(function() {
+    var inp = document.getElementById("access-code");
+    if (inp) {
+      inp.value = code;
+      inp.dispatchEvent(new Event("input"));
+    }
+  }, 300);
+}
+
+/* Esegui al caricamento pagina */
+window.addEventListener("load", handlePaymentReturn);
 </script>
 
 <script>
