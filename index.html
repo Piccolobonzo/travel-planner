@@ -6,7 +6,39 @@
 <title>TripCraft — AI Travel Planner</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e8e8f0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e8e8f0; transition: background 0.3s, color 0.3s; }
+
+  /* LIGHT MODE */
+  body.light-mode { background: #f5f5f7; color: #1a1a2e; }
+  body.light-mode nav { background: rgba(245,245,247,0.95); border-bottom-color: rgba(0,0,0,0.08); }
+  body.light-mode nav a { color: #555; }
+  body.light-mode nav a:hover { color: #1a1a2e; }
+  body.light-mode .logo { color: #1a1a2e; }
+  body.light-mode .hero { background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(108,99,255,0.12) 0%, transparent 70%); }
+  body.light-mode .hero p { color: #555; }
+  body.light-mode .step { background: #fff; border-color: rgba(0,0,0,0.08); }
+  body.light-mode .step p { color: #666; }
+  body.light-mode .feature { background: #fff; border-color: rgba(0,0,0,0.08); }
+  body.light-mode .feature p { color: #666; }
+  body.light-mode .pricing-wrap { background: rgba(0,0,0,0.02); }
+  body.light-mode .pricing-card { background: #fff; border-color: rgba(0,0,0,0.08); }
+  body.light-mode .pricing-card.featured { background: rgba(108,99,255,0.06); border-color: #6c63ff; }
+  body.light-mode .price-features li { color: #444; }
+  body.light-mode .faq-item { border-bottom-color: rgba(0,0,0,0.08); }
+  body.light-mode .faq-item p { color: #666; }
+  body.light-mode .section-sub { color: #666; }
+  body.light-mode footer { color: #888; border-top-color: rgba(0,0,0,0.08); }
+  body.light-mode footer a { color: #999; }
+  body.light-mode .divider { background: rgba(0,0,0,0.08); }
+  body.light-mode .btn-secondary { background: rgba(0,0,0,0.05); color: #333; border-color: rgba(0,0,0,0.12); }
+  body.light-mode .price-desc { color: #666; }
+  body.light-mode .pricing-card h3 { color: #666; }
+  body.light-mode #payment-result { background: rgba(62,207,142,0.08); }
+
+  /* THEME TOGGLE BUTTON */
+  .theme-toggle-btn { background: none; border: 1px solid rgba(255,255,255,0.15); color: #aaa; padding: 0.4rem 0.7rem; border-radius: 8px; cursor: pointer; font-size: 1rem; margin-left: 0.8rem; transition: all 0.2s; }
+  body.light-mode .theme-toggle-btn { border-color: rgba(0,0,0,0.15); color: #555; }
+  .theme-toggle-btn:hover { opacity: 0.8; }
 
   /* NAV */
   nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 2.5rem; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.06); }
@@ -85,6 +117,7 @@
     <a href="#come-funziona">Come funziona</a>
     <a href="#features">Funzionalità</a>
     <a href="#prezzi">Prezzi</a>
+    <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Cambia tema">🌙</button>
     <a href="#" class="nav-cta" onclick="openGenOverlay();return false;">Prova gratis →</a>
   </div>
 </nav>
@@ -906,7 +939,7 @@
             <input type="text" id="access-code" placeholder="es. AMICI2026" oninput="onAccessCodeInput()" style="text-transform:uppercase">
           </div>
         </div>
-        <div class="apikey-note">Inserisci il codice ricevuto per generare il tuo planner. Non hai un codice? <a href="index.html#prezzi" style="color:var(--accent)">Acquista qui</a>.</div>
+        <div class="apikey-note">Inserisci il codice ricevuto per generare il tuo planner. Non hai un codice? <a href="#" onclick="closeGenOverlay();openEmailPopup();return false;" style="color:var(--accent)">Ottieni 3 gratis</a> oppure <a href="#prezzi" onclick="closeGenOverlay();return false;" style="color:var(--accent)">acquista un pacchetto</a>.</div>
       </div>
 
       <hr class="divider">
@@ -6523,6 +6556,158 @@ function startFreeGeneration() {
    ============================================================ */
 init();
 
+</script>
+
+
+<style>
+/* EMAIL POPUP */
+#email-popup-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+#email-popup-overlay.visible { display: flex; }
+#email-popup {
+  background: #171b26;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  padding: 2.5rem;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+}
+body.light-mode #email-popup { background: #fff; border-color: rgba(0,0,0,0.1); color: #1a1a2e; }
+#email-popup h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.8rem; }
+#email-popup p { color: #888; font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.5rem; }
+#email-popup input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: #e8e8f0;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  outline: none;
+}
+body.light-mode #email-popup input { background: #f5f5f7; border-color: rgba(0,0,0,0.15); color: #1a1a2e; }
+#email-popup input:focus { border-color: #6c63ff; }
+#email-popup-msg { font-size: 0.85rem; margin-bottom: 1rem; min-height: 1.2rem; }
+#email-popup-msg.error { color: #e05555; }
+#email-popup-msg.success { color: #3ecf8e; }
+.popup-actions { display: flex; gap: 0.8rem; }
+.popup-actions button { flex: 1; padding: 0.8rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; border: none; }
+.popup-btn-send { background: #6c63ff; color: #fff; }
+.popup-btn-send:hover { background: #5a52e0; }
+.popup-btn-cancel { background: rgba(255,255,255,0.06); color: #aaa; border: 1px solid rgba(255,255,255,0.1) !important; }
+body.light-mode .popup-btn-cancel { background: rgba(0,0,0,0.05); color: #666; border-color: rgba(0,0,0,0.1) !important; }
+</style>
+
+<!-- EMAIL POPUP -->
+<div id="email-popup-overlay">
+  <div id="email-popup">
+    <div style="font-size:2rem;margin-bottom:0.8rem;">🎁</div>
+    <h3>3 generazioni gratuite</h3>
+    <p>Inserisci la tua email per ricevere il codice di accesso.<br>Non ti iscriviamo a nessuna newsletter e non vendiamo i tuoi dati.</p>
+    <input type="email" id="popup-email" placeholder="tua@email.com" onkeydown="if(event.key==='Enter')sendFreeCode()">
+    <div id="email-popup-msg"></div>
+    <div class="popup-actions">
+      <button class="popup-btn-cancel" onclick="closeEmailPopup()">Annulla</button>
+      <button class="popup-btn-send" id="popup-send-btn" onclick="sendFreeCode()">Invia codice →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   THEME — segue sistema utente, toggle manuale
+   ============================================================ */
+(function() {
+  var saved = localStorage.getItem("tripcraft_theme");
+  var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  var isDark = saved ? saved === "dark" : prefersDark;
+  if (!isDark) document.body.classList.add("light-mode");
+  updateThemeBtn();
+})();
+
+function toggleTheme() {
+  var isLight = document.body.classList.toggle("light-mode");
+  localStorage.setItem("tripcraft_theme", isLight ? "light" : "dark");
+  updateThemeBtn();
+}
+
+function updateThemeBtn() {
+  var btn = document.getElementById("theme-btn");
+  if (!btn) return;
+  var isLight = document.body.classList.contains("light-mode");
+  btn.textContent = isLight ? "🌙" : "☀️";
+  btn.title = isLight ? "Passa a dark mode" : "Passa a light mode";
+}
+
+/* ============================================================
+   EMAIL POPUP — codice gratuito
+   ============================================================ */
+function openEmailPopup() {
+  document.getElementById("email-popup-overlay").classList.add("visible");
+  document.getElementById("popup-email").focus();
+  document.getElementById("email-popup-msg").textContent = "";
+  document.getElementById("email-popup-msg").className = "";
+  document.getElementById("popup-send-btn").disabled = false;
+  document.getElementById("popup-send-btn").textContent = "Invia codice →";
+}
+
+function closeEmailPopup() {
+  document.getElementById("email-popup-overlay").classList.remove("visible");
+}
+
+async function sendFreeCode() {
+  var email = document.getElementById("popup-email").value.trim();
+  var msg = document.getElementById("email-popup-msg");
+  var btn = document.getElementById("popup-send-btn");
+
+  if (!email || !email.includes("@")) {
+    msg.textContent = "Inserisci un indirizzo email valido.";
+    msg.className = "error";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Invio in corso...";
+  msg.textContent = "";
+
+  try {
+    var res = await fetch("https://tripcraft-api-nu-orpin.vercel.app/api/send-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email })
+    });
+    var data = await res.json();
+
+    if (data.ok) {
+      msg.textContent = "✓ Codice inviato! Controlla la tua email.";
+      msg.className = "success";
+      btn.textContent = "Inviato ✓";
+      setTimeout(function() {
+        closeEmailPopup();
+        openGenOverlay();
+      }, 2000);
+    } else {
+      msg.textContent = data.error || "Errore durante l'invio. Riprova.";
+      msg.className = "error";
+      btn.disabled = false;
+      btn.textContent = "Invia codice →";
+    }
+  } catch(e) {
+    msg.textContent = "Errore di rete. Riprova.";
+    msg.className = "error";
+    btn.disabled = false;
+    btn.textContent = "Invia codice →";
+  }
+}
 </script>
 
 </body>
