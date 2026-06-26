@@ -129,7 +129,7 @@
   <p>Inserisci destinazione e date. TripCraft genera un planner interattivo completo — con ristoranti, escursioni, logistica e calendario giornaliero — pronto da usare offline.</p>
   <div class="hero-buttons">
     <a href="#" class="btn-primary" onclick="openGenOverlay();return false;">Genera il tuo viaggio</a>
-    <a href="planner_template_v7.html" class="btn-secondary" target="_blank">Vedi demo planner</a>
+    <a href="planner_template_v9.html" class="btn-secondary" target="_blank">Vedi demo planner</a>
   </div>
 </section>
 
@@ -391,7 +391,7 @@
 
 <!-- MAIN -->
 <div class="main">
-  <div class="page-title">Phase 2 — Generator v10</div>
+  <div class="page-title">Phase 2 — Generator v11</div>
   <div class="page-headline">Create your travel planner</div>
   <div class="page-sub">Enter your trip, transport and preferences. The AI generates a JSON file following schema v1.1.</div>
 
@@ -402,8 +402,8 @@
     <div class="step-header" onclick="toggleStep('step-guide')" style="background:rgba(79,158,248,.06)">
       <div class="step-num" style="background:var(--text3)">?</div>
       <div>
-        <div class="step-title">How to use — Quick guide</div>
-        <div class="step-subtitle">Schema v1.1 · Generator v10 · Planner v7</div>
+        <div class="step-title">Come si usa — Guida rapida</div>
+        <div class="step-subtitle">Schema v1.1 · Generator v11 · Planner v9</div>
       </div>
       <div style="flex:1"></div>
       <div class="step-chevron">▼</div>
@@ -415,11 +415,11 @@
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px">📋 Flusso di lavoro</div>
           <div style="font-size:12px;color:var(--text2);line-height:1.9">
-            <div><span style="color:var(--accent);font-weight:700">0.</span> Add A/R transport (optional but recommended)</div>
-            <div><span style="color:var(--accent);font-weight:700">1.</span> Fill in destination, dates, trip type, legs</div>
-            <div><span style="color:var(--accent);font-weight:700">2.</span> Choose calendar style and AI preferences</div>
+            <div><span style="color:var(--accent);font-weight:700">0.</span> Aggiungi trasporto A/R (opzionale)</div>
+            <div><span style="color:var(--accent);font-weight:700">1.</span> Inserisci destinazione, date, tipo viaggio, tappe</div>
+            <div><span style="color:var(--accent);font-weight:700">2.</span> Scegli stile calendario e preferenze</div>
             <div><span style="color:var(--accent);font-weight:700">3.</span> Enter your Anthropic API key and generate</div>
-            <div><span style="color:var(--accent);font-weight:700">4.</span> Download the JSON and load it into <strong>planner_template_v7.html</strong></div>
+            <div><span style="color:var(--accent);font-weight:700">4.</span> Download the JSON and load it into <strong>planner_template_v9.html</strong></div>
           </div>
         </div>
 
@@ -457,63 +457,11 @@
 
       <div style="background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.2);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.7">
         <strong style="color:var(--green)">Tip:</strong> Per il primo test usa <strong>Concise</strong> + <strong>Essenziale</strong> su una citta singola con 3 days. Costo ~$0.05. Poi scala a dettaglio completo quando sei soddisfatto del flusso.
-        <br>The generated JSON is compatible with <strong>planner_template_v7.html</strong>. Drag it into the planner drop zone to view it.
+        <br>The generated JSON is compatible with <strong>planner_template_v9.html</strong>. Drag it into the planner drop zone to view it.
       </div>
 
     </div>
   </div>
-
-  <!-- ========================================================
-       STEP 0 — JOURNEYS (A/R transport)
-  ========================================================= -->
-  <div class="step open" id="step0">
-    <div class="step-header" onclick="toggleStep('step0')">
-      <div class="step-num" id="step0-num">0</div>
-      <div>
-        <div class="step-title">Transport A/R</div>
-        <div class="step-subtitle">Flights, trains, bus — outbound and return from home</div>
-      </div>
-      <div style="flex:1"></div>
-      <div class="step-chevron">▼</div>
-    </div>
-    <div class="step-body">
-
-      <div class="info-banner" style="margin-bottom:14px">
-        Add transport <strong>from home to destination</strong> (and return).
-        Days with transport automatically become days of type <code>transfer</code> nel calendario.
-        You can add multiple segments for connecting flights or train+flight combinations.
-      </div>
-
-      <!-- Direction tabs -->
-      <div class="journey-direction-tabs">
-        <button class="dir-tab active" id="dtab-out" onclick="switchJourneyTab('outbound')">✈️ Outbound</button>
-        <button class="dir-tab" id="dtab-ret" onclick="switchJourneyTab('return')">🏠 Return</button>
-      </div>
-
-      <!-- OUTBOUND -->
-      <div class="journey-panel active" id="jpanel-outbound">
-        <div class="section-label-text">Outbound segments <span id="out-date-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
-        <div class="segments-list" id="segs-outbound"></div>
-        <button class="btn-add-segment" onclick="addSegment('outbound')">+ Add segment</button>
-        <div class="journey-summary" id="sum-outbound"></div>
-      </div>
-
-      <!-- RETURN -->
-      <div class="journey-panel" id="jpanel-return">
-        <div class="section-label-text">Return segments <span id="ret-date-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
-        <div class="segments-list" id="segs-return"></div>
-        <button class="btn-add-segment" onclick="addSegment('return')">+ Add segment</button>
-        <div class="journey-summary" id="sum-return"></div>
-      </div>
-
-      <div class="info-banner" style="margin-top:12px">
-        <strong>Optional in v2</strong> — If you haven't booked transport yet, leave empty.
-        The JSON will include a <code>journeys:[]</code> empty section you can fill in later.
-      </div>
-
-    </div>
-  </div>
-
 
   <!-- ========================================================
        STEP 1 — TRIP SETUP
@@ -522,8 +470,8 @@
     <div class="step-header" onclick="toggleStep('step1')">
       <div class="step-num" id="step1-num">1</div>
       <div>
-        <div class="step-title">Trip details</div>
-        <div class="step-subtitle">Destination, dates, trip type, legs</div>
+        <div class="step-title">Dove e quando</div>
+        <div class="step-subtitle">Destinazione, date, tipo di viaggio, tappe</div>
       </div>
       <div style="flex:1"></div>
       <div class="step-chevron">▼</div>
@@ -531,22 +479,22 @@
     <div class="step-body">
 
       <!-- Basic info -->
-      <div class="section-label-text">General info</div>
+      <div class="section-label-text">Informazioni generali</div>
       <div class="form-grid">
         <div class="field span2">
-          <label>Trip title</label>
+          <label>Titolo del viaggio</label>
           <input type="text" id="trip-title" placeholder="e.g. Ladakh Tour 2026" oninput="updateCostEstimate()">
         </div>
         <div class="field">
-          <label>Start date</label>
+          <label>Data di inizio</label>
           <input type="date" id="trip-start" onchange="updateCostEstimate()">
         </div>
         <div class="field">
-          <label>End date</label>
+          <label>Data di fine</label>
           <input type="date" id="trip-end" onchange="updateCostEstimate()">
         </div>
         <div class="field">
-          <label>Departure base</label>
+          <label>Città di partenza</label>
           <input type="text" id="trip-home" placeholder="e.g. Milan, IT">
         </div>
         <div class="field">
@@ -554,7 +502,7 @@
           <input type="text" id="trip-home-dest" placeholder="e.g. Bologna (return)">
         </div>
         <div class="field">
-          <label>Main currency</label>
+          <label>Valuta principale</label>
           <select id="trip-currency">
             <option value="EUR">EUR — Euro</option>
             <option value="USD">USD — Dollar</option>
@@ -569,7 +517,7 @@
           </select>
         </div>
         <div class="field">
-          <label>Output language</label>
+          <label>Lingua del planner</label>
           <select id="trip-lang">
             <option value="it">Italiano</option>
             <option value="en">English</option>
@@ -583,14 +531,14 @@
       <hr class="divider">
 
       <!-- Trip type -->
-      <div class="section-label-text">Trip type</div>
+      <div class="section-label-text">Tipo di viaggio</div>
       <div class="trip-type-grid">
         <div>
           <input type="radio" name="trip-type" id="type-single" value="single_city" class="trip-type-option" checked onchange="onTripTypeChange()">
           <label for="type-single" class="trip-type-label">
             <span class="trip-type-icon">🏙️</span>
             <span class="trip-type-name">Single city</span>
-            <span class="trip-type-desc">One destination</span>
+            <span class="trip-type-desc">Una sola destinazione</span>
           </label>
         </div>
         <div>
@@ -598,7 +546,7 @@
           <label for="type-multi" class="trip-type-label">
             <span class="trip-type-icon">🗺️</span>
             <span class="trip-type-name">Multi-city</span>
-            <span class="trip-type-desc">Multiple cities, day trips</span>
+            <span class="trip-type-desc">Più città, escursioni giornaliere</span>
           </label>
         </div>
         <div>
@@ -606,7 +554,7 @@
           <label for="type-tour" class="trip-type-label">
             <span class="trip-type-icon">🧭</span>
             <span class="trip-type-name">Tour / Itinerary</span>
-            <span class="trip-type-desc">Sequential legs</span>
+            <span class="trip-type-desc">Tappe sequenziali</span>
           </label>
         </div>
       </div>
@@ -618,11 +566,62 @@
       <div class="legs-container" id="legs-container"></div>
       <button class="btn-add-leg" id="btn-add-leg" onclick="addLeg()" style="display:none">+ Add leg</button>
 
+
       <hr class="divider">
 
-      <!-- Sections -->
-      <div class="section-label-text">Sections to include</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Click a section to expand and pick sub-filters. More sub-filters selected = more precise but more expensive.</div>
+      <!-- Trasporto collapsible -->
+      <details id="details-transport">
+        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--text);padding:6px 0;margin-bottom:10px;list-style:none;display:flex;align-items:center;gap:8px;">
+          &#9992;&#65039; Trasporto andata/ritorno
+          <span style="font-size:11px;font-weight:400;color:var(--green);background:rgba(16,185,129,.12);padding:1px 6px;border-radius:4px;margin-left:6px">Opzionale</span>
+        </summary>
+
+
+      <div class="info-banner" style="margin-bottom:14px">
+        Aggiungi il trasporto <strong>da casa alla destinazione</strong> (e ritorno).
+        I giorni con trasporto diventano automaticamente giorni di tipo <code>transfer</code> nel calendario.
+        Puoi aggiungere più segmenti per coincidenze o combinazioni treno+volo.
+      </div>
+
+      <!-- Direction tabs -->
+      <div class="journey-direction-tabs">
+        <button class="dir-tab active" id="dtab-out" onclick="switchJourneyTab('outbound')">✈️ Andata</button>
+        <button class="dir-tab" id="dtab-ret" onclick="switchJourneyTab('return')">🏠 Ritorno</button>
+      </div>
+
+      <!-- OUTBOUND -->
+      <div class="journey-panel active" id="jpanel-outbound">
+        <div class="section-label-text">Segmenti andata <span id="out-date-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
+        <div class="segments-list" id="segs-outbound"></div>
+        <button class="btn-add-segment" onclick="addSegment('outbound')">+ Aggiungi segmento</button>
+        <div class="journey-summary" id="sum-outbound"></div>
+      </div>
+
+      <!-- RETURN -->
+      <div class="journey-panel" id="jpanel-return">
+        <div class="section-label-text">Segmenti ritorno <span id="ret-date-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
+        <div class="segments-list" id="segs-return"></div>
+        <button class="btn-add-segment" onclick="addSegment('return')">+ Aggiungi segmento</button>
+        <div class="journey-summary" id="sum-return"></div>
+      </div>
+
+      <div class="info-banner" style="margin-top:12px">
+        <strong>Opzionale</strong> — Se non hai ancora prenotato il trasporto, lascia vuoto.
+        Il JSON includerà una sezione <code>journeys:[]</code> vuota che potrai compilare in seguito.
+      </div>
+
+    </div>
+  
+      </details>
+      <hr class="divider">
+
+      <!-- Sections collapsible -->
+      <details id="details-sections" open>
+        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--text);padding:6px 0;margin-bottom:10px;list-style:none;display:flex;align-items:center;gap:8px;">
+          &#128203; Sezioni da includere
+          <span style="font-size:11px;font-weight:400;color:var(--text3);margin-left:4px">&#8212; espandi per personalizzare</span>
+        </summary>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Clicca su una sezione per espandere i filtri. Più filtri = output più preciso ma più costoso.</div>
       <div class="sections-grid" id="sections-grid">
         <div><input type="checkbox" class="section-check" id="sec-calendar" value="calendar" checked><label for="sec-calendar" class="section-label"><span class="section-icon">📅</span> Calendar</label></div>
         <div>
@@ -738,6 +737,7 @@
           <label><input type="checkbox" class="sf-events" value="sport"> Sports events</label>
         </div>
       </div>
+      </details>
 
     </div>
   </div>
@@ -749,18 +749,18 @@
     <div class="step-header" onclick="toggleStep('step2')">
       <div class="step-num" id="step2-num">2</div>
       <div>
-        <div class="step-title">Preferences & style</div>
-        <div class="step-subtitle">Focus, detail level, special notes</div>
+        <div class="step-title">Preferenze e stile</div>
+        <div class="step-subtitle">Focus del viaggio, livello di dettaglio, note per l'AI</div>
       </div>
       <div style="flex:1"></div>
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
 
-      <div class="section-label-text">Detail level</div>
+      <div class="section-label-text">Livello di dettaglio</div>
       <div class="form-grid three">
         <div class="field">
-          <label>Detail level</label>
+          <label>Livello di dettaglio</label>
           <select id="detail-level" onchange="updateCostEstimate()">
             <option value="essenziale">Essential — fast, fewer tokens</option>
             <option value="completo" selected>Complete — balanced</option>
@@ -768,7 +768,7 @@
           </select>
         </div>
         <div class="field">
-          <label>Budget range</label>
+          <label>Fascia di budget</label>
           <select id="budget-level">
             <option value="budget">Budget / Backpacker</option>
             <option value="medio" selected>Mid-range</option>
@@ -777,7 +777,7 @@
           </select>
         </div>
         <div class="field">
-          <label>Travellers</label>
+          <label>Viaggiatori</label>
           <input type="text" id="travelers" placeholder="e.g. 2 adults, 1 child aged 8">
         </div>
       </div>
@@ -827,16 +827,16 @@
 
       <hr class="divider">
 
-      <div class="section-label-text">Notes speciali for the AI</div>
+      <div class="section-label-text">Note aggiuntive per l'AI</div>
       <div class="form-grid full">
         <div class="field">
-          <label>Free instructions</label>
+          <label>Istruzioni libere</label>
           <textarea id="special-notes" placeholder="e.g. We are vegetarian. Avoid touristy spots. We prefer challenging hikes. No chain hotels, only boutique or local guesthouses."></textarea>
         </div>
       </div>
 
       <div class="info-banner">
-        <strong>AI only (v2)</strong> — Data is generated by the AI (source: <code>ai_generated</code>). Manually entered transport uses source: <code>user_manual</code>. PDF and URL ingestion arrives in Phase 3. Always verify critical info (prices, hours, bookings) before travelling.
+        <strong>Solo AI (v2)</strong> — I dati sono generati dall'AI (sorgente: <code>ai_generated</code>). Il trasporto inserito manualmente usa sorgente: <code>user_manual</code>. Verifica sempre le informazioni critiche (prezzi, orari, prenotazioni) prima di partire.
       </div>
 
     </div>
@@ -849,8 +849,8 @@
     <div class="step-header" onclick="toggleStep('step3')">
       <div class="step-num" id="step3-num">3</div>
       <div>
-        <div class="step-title">Generation mode</div>
-        <div class="step-subtitle">Choose how to create your planner: free, AI, or combined</div>
+        <div class="step-title">Modalità di generazione</div>
+        <div class="step-subtitle">Scegli come creare il tuo planner: gratuito, AI, o combinato</div>
       </div>
       <div style="flex:1"></div>
       <div class="step-chevron">▼</div>
@@ -1018,7 +1018,7 @@
           <button onclick="closeGenOverlay();document.getElementById('prezzi').scrollIntoView({behavior:'smooth'});return false;" style="flex:1;min-width:180px;background:rgba(255,255,255,0.06);color:#ddd;border:1px solid rgba(255,255,255,0.12);padding:0.7rem 1rem;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;">💳 Acquista un pacchetto</button>
         </div>
         <button class="btn-generate" id="btn-generate" onclick="startGeneration()">
-          🚀 Generate planner
+          🚀 Genera planner
         </button>
         <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);user-select:none">
@@ -1048,7 +1048,7 @@
         </div>
         <div class="json-preview" id="json-preview"></div>
         <div class="info-banner" id="result-banner" style="margin-top:12px">
-          <strong>Next step:</strong> Load this JSON into <code>planner_template_v7.html</code> to view your interactive planner.
+          <strong>Prossimo passo:</strong> Apri il planner con il bottone qui sopra per visualizzare il tuo itinerario.
         </div>
       </div>
 
@@ -1411,7 +1411,7 @@ async function extractFromUrl(apiKey, src, destination, lang) {
     "Estrai SOLO elementi rilevanti per la destinazione " + destination + ". " +
     "Per i ristoranti includi categoria e prezzo se presenti. " +
     "IMPORTANTE sui link e contatti: se nella pagina sorgente sono presenti un sito web ufficiale, un numero di telefono, un indirizzo email o un link diretto per un luogo/attivita specifica, riportali ESATTAMENTE come scritti nei campi 'website' e 'phone'. Non inventare o indovinare URL: se non sono presenti nel testo, lascia il campo vuoto. Nel campo 'url' metti sempre " + src.href + " (la pagina sorgente), mentre 'website' e 'phone' sono per i contatti specifici del singolo luogo se presenti nel testo. " +
-    "Output language: " + lang + ". " +
+    "Lingua del planner: " + lang + ". " +
     "Se non riesci ad accedere all'URL o non ci sono dati utili, restituisci { \"items\": [] }.";
 
   var result = await callApiWithTool(apiKey, sys, user, 3000);
@@ -1425,7 +1425,7 @@ async function extractFromPdf(apiKey, pdf, destination, lang) {
     "Restituisci:\n" +
     '{ "items": [ { "type": "restaurant|excursion|museum|logistics|park|zone|event", "name": "...", "description": "...", "lat": null, "lng": null, "notes": "...", "url": "", "website": "...", "phone": "..." } ] }\n\n' +
     "IMPORTANTE sui link e contatti: se nel testo del PDF sono presenti siti web, numeri di telefono o indirizzi email specifici per un luogo, riportali ESATTAMENTE come scritti nei campi 'website' e 'phone'. Non inventare o indovinare contatti: se non sono presenti nel testo del documento, lascia i campi vuoti. " +
-    "Output language: " + lang + ".";
+    "Lingua del planner: " + lang + ".";
 
   var resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -1451,7 +1451,16 @@ async function extractFromPdf(apiKey, pdf, destination, lang) {
 
   if (!resp.ok) {
     var err = await resp.json().catch(function() { return {}; });
-    throw new Error((err.error && err.error.message) ? err.error.message : "HTTP " + resp.status);
+    var errType = (err.error && err.error.type) ? err.error.type : "";
+    var errMap = {
+      "authentication_error": "Chiave API non valida. Controlla il codice di accesso.",
+      "permission_error": "Il codice di accesso non ha i permessi necessari.",
+      "rate_limit_error": "Troppe richieste. Riprova tra qualche minuto.",
+      "insufficient_quota": "Credito esaurito. Ricarica il tuo account per continuare.",
+      "overloaded_error": "I server AI sono sovraccarichi. Riprova tra poco.",
+      "invalid_request_error": "Richiesta non valida: controlla i dati inseriti."
+    };
+    throw new Error(errMap[errType] || ((err.error && err.error.message) ? err.error.message : "Errore HTTP " + resp.status));
   }
   var data = await resp.json();
   var text = (data.content || []).map(function(b) { return b.text || ""; }).join("").trim();
@@ -1485,7 +1494,16 @@ async function callApiWithTool(apiKey, sys, user, maxTokens) {
 
   if (!resp.ok) {
     var err = await resp.json().catch(function() { return {}; });
-    throw new Error((err.error && err.error.message) ? err.error.message : "HTTP " + resp.status);
+    var errType = (err.error && err.error.type) ? err.error.type : "";
+    var errMap = {
+      "authentication_error": "Chiave API non valida. Controlla il codice di accesso.",
+      "permission_error": "Il codice di accesso non ha i permessi necessari.",
+      "rate_limit_error": "Troppe richieste. Riprova tra qualche minuto.",
+      "insufficient_quota": "Credito esaurito. Ricarica il tuo account per continuare.",
+      "overloaded_error": "I server AI sono sovraccarichi. Riprova tra poco.",
+      "invalid_request_error": "Richiesta non valida: controlla i dati inseriti."
+    };
+    throw new Error(errMap[errType] || ((err.error && err.error.message) ? err.error.message : "Errore HTTP " + resp.status));
   }
   var data = await resp.json();
   /* Collect all text blocks from the response (may include tool_use results) */
@@ -2107,7 +2125,7 @@ function renderLegs() {
     html += "<option value='fixed'" + (isFixed ? " selected" : "") + ">Fixed</option>";
     html += "<option value='flexible'" + (!isFixed ? " selected" : "") + ">Flexible</option>";
     html += "</select></div>";
-    html += "<div class='field'><label>Start date</label>";
+    html += "<div class='field'><label>Data di inizio</label>";
     html += "<input type='date' value='" + (leg.dateFrom || "") + "' oninput='updateLegField(" + i + ", \"dateFrom\", this.value)'></div>";
     html += "</div>";
     html += "</div>";
@@ -2250,10 +2268,10 @@ function startGeneration() {
 
   if (!isMock && mode === "free") {
     if (sourcePdfs.length === 0 && sourceCsvs.length === 0 && sourceTexts.length === 0) {
-      showError("Please upload at least one PDF, CSV or TXT/MD file for free mode."); return;
+      showError("Carica almeno un file PDF, CSV o TXT/MD per la modalità gratuita."); return;
     }
     if (extractedItems.length === 0) {
-      showError("No items extracted from files. Try AI + file mode."); return;
+      showError("Nessun dato estratto dai file. Prova la modalità AI + file."); return;
     }
     startFreeGeneration();
     return;
@@ -2280,8 +2298,8 @@ function startGeneration() {
   var focusTags = [];
   document.querySelectorAll(".focus-check:checked").forEach(function(el) { focusTags.push(el.value); });
 
-  if (!startDate || !endDate) { showError("Please enter trip start and end dates."); return; }
-  if (legs.length === 0 || !legs[0].name) { showError("Please enter at least the first destination name."); return; }
+  if (!startDate || !endDate) { showError("Inserisci le date di inizio e fine del viaggio."); return; }
+  if (legs.length === 0 || !legs[0].name) { showError("Inserisci almeno il nome della prima destinazione."); return; }
 
   var totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000) + 1;
 
@@ -2697,7 +2715,7 @@ async function runGenerationPipeline(apiKey, ctx) {
       return el && el.classList.contains("active");
     });
     if (activeStep) setStepStatus(activeStep, "error");
-    showError("Error during generation: " + err.message);
+    showError(err.message || "Errore durante la generazione. Riprova.");
     log("  \u2717 Errore: " + err.message);
     document.getElementById("btn-generate").disabled = false;
   }
@@ -2792,7 +2810,7 @@ function buildTripContext(ctx) {
   return "VIAGGIO: " + ctx.title + "\n" +
     "Tipo: " + ctx.tripType + "\n" +
     "Date: " + ctx.startDate + " -> " + ctx.endDate + " (" + ctx.totalDays + " days)\n" +
-    "Base partenza: " + ctx.homeBase + (ctx.homeBaseDest && ctx.homeBaseDest !== ctx.homeBase ? " | Base rientro: " + ctx.homeBaseDest : "") + " | Valuta: " + ctx.currency + " | Output language: " + ctx.lang + "\n" +
+    "Base partenza: " + ctx.homeBase + (ctx.homeBaseDest && ctx.homeBaseDest !== ctx.homeBase ? " | Base rientro: " + ctx.homeBaseDest : "") + " | Valuta: " + ctx.currency + " | Lingua del planner: " + ctx.lang + "\n" +
     "Budget: " + ctx.budgetLevel + " | Livello dettaglio: " + ctx.detailLevel + "\n" +
     "Travellers: " + (ctx.travelers || "non specificato") + "\n" +
     "Focus: " + (ctx.focusTags.length ? ctx.focusTags.join(", ") : "generale") + "\n" +
@@ -3299,7 +3317,7 @@ init();
   <div class="help-modal">
     <button class="help-close" onclick="toggleHelpModal()">✕ Chiudi</button>
     <div class="help-title">🗺️ How to use the Travel Planner Generator</div>
-    <div class="help-version">Schema v1.1 · Generator v10.0 · Planner v7.0</div>
+    <div class="help-version">Schema v1.1 · Generator v11.0 · Planner v9.0</div>
 
     <div class="help-section">
       <div class="help-section-title">Flusso di lavoro</div>
@@ -3335,7 +3353,7 @@ init();
         <div class="help-step-num">4</div>
         <div class="help-step-body">
           <div class="help-step-title">Download JSON and open it in the Planner</div>
-          <div class="help-step-desc">After generation, download the JSON and drag it into <strong>planner_template_v7.html</strong>. The planner works offline — no server, no account, all data in the browser.</div>
+          <div class="help-step-desc">After generation, download the JSON and drag it into <strong>planner_template_v9.html</strong>. The planner works offline — no server, no account, all data in the browser.</div>
         </div>
       </div>
     </div>
@@ -3375,8 +3393,8 @@ init();
       <div class="help-section-title">Versions</div>
       <div class="help-tip">
         <strong>Schema v1.1</strong> — adds A/R journeys and structured calendar slots<br>
-        <strong>Generator v10.0</strong> — Step 0 journey builder, calendar style, category sub-filters, schema v1.1 output<br>
-        <strong>Planner v7.0</strong> — Journeys tab, segment timeline, concise/structured/detailed toggle, swap-day arrows<br>
+        <strong>Generator v11.0</strong> — Step 0 journey builder, calendar style, category sub-filters, schema v1.1 output<br>
+        <strong>Planner v9.0</strong> — Journeys tab, segment timeline, concise/structured/detailed toggle, swap-day arrows<br>
         <strong>Coming soon:</strong> PDF and URL ingestion (Phase 3), ticket upload from email
       </div>
     </div>
@@ -4736,7 +4754,7 @@ async function extractFromUrl(apiKey, src, destination, lang) {
     "Estrai SOLO elementi rilevanti per la destinazione " + destination + ". " +
     "Per i ristoranti includi categoria e prezzo se presenti. " +
     "IMPORTANTE sui link e contatti: se nella pagina sorgente sono presenti un sito web ufficiale, un numero di telefono, un indirizzo email o un link diretto per un luogo/attivita specifica, riportali ESATTAMENTE come scritti nei campi 'website' e 'phone'. Non inventare o indovinare URL: se non sono presenti nel testo, lascia il campo vuoto. Nel campo 'url' metti sempre " + src.href + " (la pagina sorgente), mentre 'website' e 'phone' sono per i contatti specifici del singolo luogo se presenti nel testo. " +
-    "Output language: " + lang + ". " +
+    "Lingua del planner: " + lang + ". " +
     "Se non riesci ad accedere all'URL o non ci sono dati utili, restituisci { \"items\": [] }.";
 
   var result = await callApiWithTool(apiKey, sys, user, 3000);
@@ -4750,7 +4768,7 @@ async function extractFromPdf(apiKey, pdf, destination, lang) {
     "Restituisci:\n" +
     '{ "items": [ { "type": "restaurant|excursion|museum|logistics|park|zone|event", "name": "...", "description": "...", "lat": null, "lng": null, "notes": "...", "url": "", "website": "...", "phone": "..." } ] }\n\n' +
     "IMPORTANTE sui link e contatti: se nel testo del PDF sono presenti siti web, numeri di telefono o indirizzi email specifici per un luogo, riportali ESATTAMENTE come scritti nei campi 'website' e 'phone'. Non inventare o indovinare contatti: se non sono presenti nel testo del documento, lascia i campi vuoti. " +
-    "Output language: " + lang + ".";
+    "Lingua del planner: " + lang + ".";
 
   var resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -4776,7 +4794,16 @@ async function extractFromPdf(apiKey, pdf, destination, lang) {
 
   if (!resp.ok) {
     var err = await resp.json().catch(function() { return {}; });
-    throw new Error((err.error && err.error.message) ? err.error.message : "HTTP " + resp.status);
+    var errType = (err.error && err.error.type) ? err.error.type : "";
+    var errMap = {
+      "authentication_error": "Chiave API non valida. Controlla il codice di accesso.",
+      "permission_error": "Il codice di accesso non ha i permessi necessari.",
+      "rate_limit_error": "Troppe richieste. Riprova tra qualche minuto.",
+      "insufficient_quota": "Credito esaurito. Ricarica il tuo account per continuare.",
+      "overloaded_error": "I server AI sono sovraccarichi. Riprova tra poco.",
+      "invalid_request_error": "Richiesta non valida: controlla i dati inseriti."
+    };
+    throw new Error(errMap[errType] || ((err.error && err.error.message) ? err.error.message : "Errore HTTP " + resp.status));
   }
   var data = await resp.json();
   var text = (data.content || []).map(function(b) { return b.text || ""; }).join("").trim();
@@ -4810,7 +4837,16 @@ async function callApiWithTool(apiKey, sys, user, maxTokens) {
 
   if (!resp.ok) {
     var err = await resp.json().catch(function() { return {}; });
-    throw new Error((err.error && err.error.message) ? err.error.message : "HTTP " + resp.status);
+    var errType = (err.error && err.error.type) ? err.error.type : "";
+    var errMap = {
+      "authentication_error": "Chiave API non valida. Controlla il codice di accesso.",
+      "permission_error": "Il codice di accesso non ha i permessi necessari.",
+      "rate_limit_error": "Troppe richieste. Riprova tra qualche minuto.",
+      "insufficient_quota": "Credito esaurito. Ricarica il tuo account per continuare.",
+      "overloaded_error": "I server AI sono sovraccarichi. Riprova tra poco.",
+      "invalid_request_error": "Richiesta non valida: controlla i dati inseriti."
+    };
+    throw new Error(errMap[errType] || ((err.error && err.error.message) ? err.error.message : "Errore HTTP " + resp.status));
   }
   var data = await resp.json();
   /* Collect all text blocks from the response (may include tool_use results) */
@@ -5432,7 +5468,7 @@ function renderLegs() {
     html += "<option value='fixed'" + (isFixed ? " selected" : "") + ">Fixed</option>";
     html += "<option value='flexible'" + (!isFixed ? " selected" : "") + ">Flexible</option>";
     html += "</select></div>";
-    html += "<div class='field'><label>Start date</label>";
+    html += "<div class='field'><label>Data di inizio</label>";
     html += "<input type='date' value='" + (leg.dateFrom || "") + "' oninput='updateLegField(" + i + ", \"dateFrom\", this.value)'></div>";
     html += "</div>";
     html += "</div>";
@@ -5575,10 +5611,10 @@ function startGeneration() {
 
   if (!isMock && mode === "free") {
     if (sourcePdfs.length === 0 && sourceCsvs.length === 0 && sourceTexts.length === 0) {
-      showError("Please upload at least one PDF, CSV or TXT/MD file for free mode."); return;
+      showError("Carica almeno un file PDF, CSV o TXT/MD per la modalità gratuita."); return;
     }
     if (extractedItems.length === 0) {
-      showError("No items extracted from files. Try AI + file mode."); return;
+      showError("Nessun dato estratto dai file. Prova la modalità AI + file."); return;
     }
     startFreeGeneration();
     return;
@@ -5605,8 +5641,8 @@ function startGeneration() {
   var focusTags = [];
   document.querySelectorAll(".focus-check:checked").forEach(function(el) { focusTags.push(el.value); });
 
-  if (!startDate || !endDate) { showError("Please enter trip start and end dates."); return; }
-  if (legs.length === 0 || !legs[0].name) { showError("Please enter at least the first destination name."); return; }
+  if (!startDate || !endDate) { showError("Inserisci le date di inizio e fine del viaggio."); return; }
+  if (legs.length === 0 || !legs[0].name) { showError("Inserisci almeno il nome della prima destinazione."); return; }
 
   var totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000) + 1;
 
@@ -6022,7 +6058,7 @@ async function runGenerationPipeline(apiKey, ctx) {
       return el && el.classList.contains("active");
     });
     if (activeStep) setStepStatus(activeStep, "error");
-    showError("Error during generation: " + err.message);
+    showError(err.message || "Errore durante la generazione. Riprova.");
     log("  \u2717 Errore: " + err.message);
     document.getElementById("btn-generate").disabled = false;
   }
@@ -6117,7 +6153,7 @@ function buildTripContext(ctx) {
   return "VIAGGIO: " + ctx.title + "\n" +
     "Tipo: " + ctx.tripType + "\n" +
     "Date: " + ctx.startDate + " -> " + ctx.endDate + " (" + ctx.totalDays + " days)\n" +
-    "Base partenza: " + ctx.homeBase + (ctx.homeBaseDest && ctx.homeBaseDest !== ctx.homeBase ? " | Base rientro: " + ctx.homeBaseDest : "") + " | Valuta: " + ctx.currency + " | Output language: " + ctx.lang + "\n" +
+    "Base partenza: " + ctx.homeBase + (ctx.homeBaseDest && ctx.homeBaseDest !== ctx.homeBase ? " | Base rientro: " + ctx.homeBaseDest : "") + " | Valuta: " + ctx.currency + " | Lingua del planner: " + ctx.lang + "\n" +
     "Budget: " + ctx.budgetLevel + " | Livello dettaglio: " + ctx.detailLevel + "\n" +
     "Travellers: " + (ctx.travelers || "non specificato") + "\n" +
     "Focus: " + (ctx.focusTags.length ? ctx.focusTags.join(", ") : "generale") + "\n" +
