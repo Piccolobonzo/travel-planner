@@ -2888,12 +2888,10 @@ function renderImport(el) {
     "<div id='jsonStatus' style='margin-top:8px;font-size:12px'></div>" +
     "</div>" +
 
-    /* URL */
+    /* URL — usa il generator TripCraft (non API key nel planner) */
     "<div style='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px'>" +
-    "<div style='font-size:13px;font-weight:700;margin-bottom:8px'>🌐 Import from URL (requires API key)</div>" +
-    "<div style='display:flex;gap:8px;margin-bottom:8px'><input id='urlFetchInput' type='text' placeholder='https://...' style='flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--sans);font-size:12px;background:var(--bg3);color:var(--ink)'><button onclick='fetchUrlImport()' style='padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer'>Extract</button></div>" +
-    "<input type='password' id='urlApiKeyImport' placeholder='Anthropic API key (sk-ant-...)' style='width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--sans);font-size:12px;background:var(--bg3);color:var(--ink)'>" +
-    "<div id='urlStatus' style='margin-top:8px;font-size:12px'></div>" +
+    "<div style='font-size:13px;font-weight:700;margin-bottom:8px'>🌐 Import da URL</div>" +
+    "<div style='font-size:12px;color:var(--text2);line-height:1.7'>Per analizzare siti web (TripAdvisor, guide ufficiali, ecc.) usa la <strong>modalità Generazione AI</strong> sul generator TripCraft e aggiungi gli URL lì. Il planner importa il JSON risultante.</div>" +
     "</div>" +
 
     /* Free AI tip */
@@ -3073,7 +3071,7 @@ function renderGuide(el) {
   };
 
   var html = "<div class='section-title'>📖 Guide — How to use the Travel Planner</div>";
-  html += "<div style='font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:20px'>Schema v1.1 · Generator v9.0 · Planner v7.0</div>";
+  html += "<div style='font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:20px'>Schema v1.1 · TripCraft Generator · Planner v9</div>";
 
   /* ---- QUICK START ---- */
   html += "<div class='guide-section-label'>🚀 Quick Start</div>";
@@ -3081,7 +3079,7 @@ function renderGuide(el) {
   html += card("📂", "Load your planner",
     "Drag a <strong>JSON</strong> file onto the initial drop zone.<br>" +
     "You can load multiple files together — they merge automatically.<br>" +
-    "Don't have a JSON? Create one with <strong>generator_v9.html</strong> or ask a free AI.");
+    "Don't have a JSON? Create one from the <strong>TripCraft home page</strong> (Genera il tuo viaggio) or import CSV/TXT here.");
   html += card("📊", "Formato CSV minimo",
     "Required columns: " + code("nome") + " " + code("tipo") + "<br>" +
     "Useful columns: " + code("note") + " " + code("url") + " " + code("prezzo") + " " + code("lat") + " " + code("lng") + "<br>" +
@@ -3186,11 +3184,11 @@ function renderGuide(el) {
 
   html += "</div>"; /* end guide-prompts-grid */
 
-  /* ---- API KEY NOTE ---- */
+  /* ---- ACCESS CODE NOTE ---- */
   html += "<div style='background:rgba(79,158,248,.07);border:1px solid rgba(79,158,248,.25);border-radius:var(--radius);padding:14px;font-size:12px;color:var(--ink);line-height:1.8;margin-top:8px'>";
-  html += "<strong style='color:var(--accent)'>🔑 Quando serve la tua API key Anthropic?</strong><br>";
-  html += "Solo per: <strong>generare il planner da zero</strong> con <em>generator_v2.html</em> e <strong>estrarre dati da URL</strong> (tab Importa). ";
-  html += "Per tutto il resto — CSV, JSON, dati manuali, prompt su AI gratuita — non serve nulla. Costo tipico per generare un planner completo: $0.05–0.30.";
+  html += "<strong style='color:var(--accent)'>🔑 Quando serve il codice TripCraft?</strong><br>";
+  html += "Solo per <strong>generare un planner con l'AI</strong> dalla home TripCraft. ";
+  html += "Nel planner — import CSV, JSON, TXT, note manuali e sync JSONBin — <strong>non serve alcun codice</strong>.";
   html += "</div>";
 
   el.innerHTML = html;
