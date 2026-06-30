@@ -34,6 +34,23 @@
   body.light-mode .price-desc { color: #666; }
   body.light-mode .pricing-card h3 { color: #666; }
   body.light-mode #payment-result { background: rgba(62,207,142,0.08); }
+  body.light-mode .demo-card { background: #fff; border-color: rgba(0,0,0,0.08); }
+  body.light-mode .demo-mock { background: #f4f6fb; border-color: rgba(0,0,0,0.08); }
+  body.light-mode .demo-card p { color: #666; }
+
+  /* DEMO */
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+  .demo-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.4rem; }
+  .demo-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .demo-card .demo-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #0ea5e9; margin-bottom: 0.6rem; }
+  .demo-card p { color: #888; font-size: 0.85rem; line-height: 1.6; margin-bottom: 1rem; }
+  .demo-mock { background: #121826; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; font-size: 11px; color: #8a94a8; line-height: 1.7; min-height: 120px; }
+  .demo-mock .dm-day { color: #0ea5e9; font-weight: 700; margin-bottom: 4px; }
+  .demo-mock .dm-slot { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .demo-cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+  .demo-path { max-width: 720px; margin: 0 auto 2.5rem; text-align: center; color: #888; font-size: 0.92rem; line-height: 1.8; }
+  .demo-path strong { color: #e8e8f0; }
+  body.light-mode .demo-path strong { color: #1a1a2e; }
 
   /* THEME TOGGLE BUTTON */
   .theme-toggle-btn { background: none; border: 1px solid rgba(255,255,255,0.15); color: #aaa; padding: 0.4rem 0.7rem; border-radius: 8px; cursor: pointer; font-size: 1rem; margin-left: 0.8rem; transition: all 0.2s; }
@@ -115,6 +132,7 @@
   <div class="logo">Trip<span>Craft</span></div>
   <div>
     <a href="#come-funziona">Come funziona</a>
+    <a href="#demo">Demo</a>
     <a href="#features">Funzionalità</a>
     <a href="#prezzi">Prezzi</a>
     <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Cambia tema">🌙</button>
@@ -126,10 +144,10 @@
 <section class="hero">
   <div class="hero-badge">✦ Powered by Claude AI</div>
   <h1>Il tuo viaggio,<br><span>pianificato in secondi</span></h1>
-  <p>Inserisci destinazione e date. TripCraft genera un planner interattivo completo — con ristoranti, escursioni, logistica e calendario giornaliero — pronto da usare offline.</p>
+  <p>Inserisci destinazione e date. TripCraft genera un planner interattivo completo — calendario, mappa, ristoranti e logistica — pronto da usare offline.</p>
   <div class="hero-buttons">
-    <a href="#" class="btn-primary" onclick="openGenOverlay();return false;">Genera il tuo viaggio</a>
-    <a href="planner_template_v9.html" class="btn-secondary" target="_blank">Vedi demo planner</a>
+    <a href="#" class="btn-primary" onclick="openGenOverlay();return false;">Prova gratis — 3 generazioni</a>
+    <a href="#demo" class="btn-secondary">Guarda come funziona</a>
   </div>
 </section>
 
@@ -222,12 +240,68 @@
 
 <div class="divider"></div>
 
+<!-- DEMO -->
+<section class="section" id="demo">
+  <div class="section-label">Provalo prima di comprare</div>
+  <h2 class="section-title">Dal file al planner completo</h2>
+  <p class="section-sub">La maggior parte degli utenti inizia con le 3 prove gratuite. Ecco cosa ottieni a seconda del livello scelto.</p>
+
+  <div class="demo-path">
+    Percorso consigliato: <strong>1) Guarda la demo</strong> → <strong>2) Prova gratis con il tuo file</strong> → <strong>3) Scegli un piano</strong> se ti serve l'AI o più generazioni.
+  </div>
+
+  <div class="demo-grid">
+    <div class="demo-card">
+      <div class="demo-tag">Livello 1 — Gratis</div>
+      <h3>Da PDF o CSV</h3>
+      <p>Carichi la tua guida o un foglio Excel. TripCraft estrae luoghi e li organizza in un planner navigabile.</p>
+      <div class="demo-mock">
+        <div class="dm-day">📂 Modalità file</div>
+        <div class="dm-slot">🍽️ Trattoria da Mario — centro storico</div>
+        <div class="dm-slot">🏛️ Museo X — orari da file</div>
+        <div class="dm-slot">🥾 Escursione laguna — da CSV</div>
+      </div>
+    </div>
+    <div class="demo-card">
+      <div class="demo-tag">Livello 2 — AI essenziale</div>
+      <h3>Planner generato dall'AI</h3>
+      <p>Destinazione + date → calendario giornaliero con slot mattina/pranzo/pomeriggio/sera e mappa integrata.</p>
+      <div class="demo-mock">
+        <div class="dm-day">📅 Giorno 1 — Roma</div>
+        <div class="dm-slot">09:00 Colosseo · 13:00 Trastevere</div>
+        <div class="dm-slot">15:30 Fori · 20:00 Cena locale</div>
+        <div class="dm-slot">🗺️ Tutti i punti sulla mappa</div>
+      </div>
+    </div>
+    <div class="demo-card">
+      <div class="demo-tag">Livello 3 — AI completo</div>
+      <h3>Tour multi-tappa</h3>
+      <p>Trasporti A/R, più città, ristoranti filtrati, logistica, emergenze locali e planner offline scaricabile.</p>
+      <div class="demo-mock">
+        <div class="dm-day">✈️ Bologna → Tunisi → Roma</div>
+        <div class="dm-slot">🍽️ 12 ristoranti · 🥾 8 escursioni</div>
+        <div class="dm-slot">📋 SIM, taxi, orari musei</div>
+        <div class="dm-slot">📵 HTML offline — nessun account</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-cta-row">
+    <a href="planner_template_v9.html" class="btn-secondary" target="_blank">Apri planner demo (vuoto)</a>
+    <a href="#" class="btn-primary" onclick="openGenOverlay();return false;">Prova gratis ora →</a>
+    <a href="#" class="btn-secondary" onclick="goToPrezzi();return false;">Vai ai piani e prezzi</a>
+  </div>
+  <p style="text-align:center;color:#666;font-size:0.82rem;margin-top:1.2rem;">Video tutorial in arrivo. Per ora: demo interattiva + 3 generazioni gratuite con la tua email.</p>
+</section>
+
+<div class="divider"></div>
+
 <!-- PRICING -->
 <div class="pricing-wrap">
 <section class="section" id="prezzi">
   <div class="section-label">Prezzi</div>
   <h2 class="section-title">Semplice e trasparente</h2>
-  <p class="section-sub">Scegli il piano giusto per te. Senza AI usa i tuoi file gratis. Con AI paga solo i viaggi che generi.</p>
+  <p class="section-sub">Inizia con 3 prove gratuite. Poi scegli il piano file o AI che ti serve.</p>
 
   <!-- Messaggio codice post-pagamento -->
   <div id="payment-result" style="display:none;max-width:600px;margin:0 auto 2rem;background:rgba(62,207,142,0.1);border:2px solid #3ecf8e;border-radius:14px;padding:1.8rem;text-align:center;">
@@ -955,7 +1029,7 @@
             <input type="text" id="access-code" placeholder="es. AMICI2026" oninput="onAccessCodeInput()" style="text-transform:uppercase">
           </div>
         </div>
-        <div class="apikey-note">Inserisci il codice ricevuto per generare il tuo planner. Non hai un codice? <a href="#" onclick="closeGenOverlay();openEmailPopup();return false;" style="color:var(--accent)">Ottieni 3 gratis</a> oppure <a href="#prezzi" onclick="closeGenOverlay();return false;" style="color:var(--accent)">acquista un pacchetto</a>.</div>
+        <div class="apikey-note">Inserisci il codice ricevuto per generare il tuo planner. Non hai un codice? <a href="#" onclick="openEmailPopup();return false;" style="color:var(--accent)">Ottieni 3 gratis</a> oppure <a href="#" onclick="goToPrezzi();return false;" style="color:var(--accent)">vedi i piani</a>.</div>
       </div>
 
       <!-- Cost estimate: hidden from all users -->
@@ -990,7 +1064,7 @@
       <div class="generate-section">
         <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
           <button onclick="closeGenOverlay();openEmailPopup();return false;" style="flex:1;min-width:180px;background:#10b981;color:#fff;border:none;padding:0.7rem 1rem;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer;">🎁 Ottieni 3 generazioni gratis</button>
-          <button onclick="closeGenOverlay();document.getElementById('prezzi').scrollIntoView({behavior:'smooth'});return false;" style="flex:1;min-width:180px;background:rgba(255,255,255,0.06);color:#ddd;border:1px solid rgba(255,255,255,0.12);padding:0.7rem 1rem;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;">💳 Acquista un pacchetto</button>
+          <button onclick="goToPrezzi();return false;" style="flex:1;min-width:180px;background:rgba(255,255,255,0.06);color:#ddd;border:1px solid rgba(255,255,255,0.12);padding:0.7rem 1rem;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;">💳 Vai ai piani</button>
         </div>
         <button class="btn-generate" id="btn-generate" onclick="startGeneration()">
           🚀 Genera planner
@@ -4276,6 +4350,12 @@ function closeGenOverlay() {
   document.getElementById("gen-overlay").style.display = "none";
   document.body.classList.remove("gen-open");
 }
+function goToPrezzi() {
+  closeGenOverlay();
+  setTimeout(function() {
+    document.getElementById("prezzi").scrollIntoView({ behavior: "smooth" });
+  }, 150);
+}
 
 /* ============================================================
    STRIPE CHECKOUT
@@ -4336,9 +4416,8 @@ async function handlePaymentReturn() {
       if (data.code) {
         document.getElementById("payment-code").textContent = data.code;
         document.getElementById("payment-result").style.display = "block";
-        /* Pulisce URL senza ricaricare la pagina */
         window.history.replaceState({}, "", window.location.pathname);
-        document.getElementById("prezzi").scrollIntoView({ behavior: "smooth" });
+        useCodeNow();
       }
     } catch(e) {
       console.error("Errore conferma pagamento:", e);
