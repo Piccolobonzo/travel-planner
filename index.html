@@ -849,7 +849,7 @@
       <div class="step-num" id="step3-num">3</div>
       <div>
         <div class="step-title">Modalità di generazione</div>
-        <div class="step-subtitle">Scegli come creare il tuo planner: gratuito, AI, o combinato</div>
+        <div class="step-subtitle">Scegli: solo file locali oppure generazione AI</div>
       </div>
       <div style="flex:1"></div>
       <div class="step-chevron">▼</div>
@@ -857,7 +857,7 @@
     <div class="step-body">
 
       <!-- MODE SELECTOR -->
-      <div class="section-label-text">Mode</div>
+      <div class="section-label-text">Modalità</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
 
         <div>
@@ -865,8 +865,8 @@
           <label for="mode-free" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
             <span class="trip-type-icon">📂</span>
             <div>
-              <div class="trip-type-name">Local files only <span style="color:var(--green);font-size:10px;font-weight:700">FREE</span></div>
-              <div class="trip-type-desc">Upload PDF or CSV — no API key needed. The planner reads your files and structures the data.</div>
+              <div class="trip-type-name">Solo file locali <span style="color:var(--green);font-size:10px;font-weight:700">GRATIS</span></div>
+              <div class="trip-type-desc">Carica PDF, CSV o TXT. TripCraft struttura i dati senza AI. Richiede codice di accesso (anche quello gratuito).</div>
             </div>
           </label>
         </div>
@@ -876,37 +876,15 @@
           <label for="mode-ai" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
             <span class="trip-type-icon">🤖</span>
             <div>
-              <div class="trip-type-name">AI only</div>
-              <div class="trip-type-desc">L'AI genera tutto da zero. Richiede un codice di accesso TripCraft (acquisto o prova gratuita).</div>
-            </div>
-          </label>
-        </div>
-
-        <div>
-          <input type="radio" name="gen-mode" id="mode-ai-files" value="ai_files" class="trip-type-option" onchange="onModeChange()">
-          <label for="mode-ai-files" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
-            <span class="trip-type-icon">🤖📄</span>
-            <div>
-              <div class="trip-type-name">AI + local files <span style="color:var(--accent);font-size:10px;font-weight:700">RECOMMENDED</span></div>
-              <div class="trip-type-desc">Your PDF/CSV files become context for the AI. More accurate output, "high" confidence, fewer wasted tokens.</div>
-            </div>
-          </label>
-        </div>
-
-        <div>
-          <input type="radio" name="gen-mode" id="mode-ai-url" value="ai_url" class="trip-type-option" onchange="onModeChange()">
-          <label for="mode-ai-url" class="trip-type-label" style="align-items:flex-start;text-align:left;gap:8px;padding:14px">
-            <span class="trip-type-icon">🤖🌐</span>
-            <div>
-              <div class="trip-type-name">AI + web URLs</div>
-              <div class="trip-type-desc">The AI reads websites you specify (TripAdvisor, official site...) and extracts real data from them.</div>
+              <div class="trip-type-name">Generazione AI</div>
+              <div class="trip-type-desc">L'AI crea il planner completo. Opzionale: aggiungi file o URL come fonti. Richiede codice di accesso TripCraft.</div>
             </div>
           </label>
         </div>
 
       </div>
 
-      <!-- FILE UPLOAD SECTION (visible for modes: free, ai_files) -->
+      <!-- FILE UPLOAD SECTION (free mode or optional in AI mode) -->
       <div id="section-files" style="display:none">
         <hr class="divider">
         <div class="section-label-text">Files to upload <span id="upload-count-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)"></span></div>
@@ -933,7 +911,7 @@
         </div>
       </div>
 
-      <!-- URL SECTION (visible for mode: ai_url) -->
+      <!-- URL SECTION (optional in AI mode) -->
       <div id="section-urls" style="display:none">
         <hr class="divider">
         <div class="section-label-text">URL da analizzare <span id="url-count-badge" style="color:var(--text3);font-weight:400;font-family:var(--mono)">(0)</span></div>
@@ -1703,8 +1681,8 @@ function getGenMode() {
 function onModeChange() {
   var mode = getGenMode();
   var isFree    = mode === "free";
-  var needFiles = mode === "free" || mode === "ai_files";
-  var needUrl   = mode === "ai_url";
+  var needFiles = mode === "free" || mode === "ai";
+  var needUrl   = mode === "ai";
   var needApi   = mode !== "free";
 
   document.getElementById("section-files").style.display  = needFiles ? "block" : "none";
