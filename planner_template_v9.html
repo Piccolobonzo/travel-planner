@@ -3036,28 +3036,6 @@ function processJsonImport(file) {
   reader.readAsText(file);
 }
 
-async function fetchUrlImport() {
-  var url=(document.getElementById("urlFetchInput")||{}).value.trim();
-  var apiKey=(document.getElementById("urlApiKeyImport")||{}).value.trim();
-  var status=document.getElementById("urlStatus");
-  if(!url||!apiKey){if(status)status.innerHTML="<div style='background:#FEE2E2;color:#991B1B;padding:6px 10px;border-radius:6px'>Inserisci URL e API key.</div>";return;}
-  if(status)status.innerHTML="<div style='padding:6px 10px'>⏳ Analisi URL...</div>";
-  try {
-    var dest=TPG&&TPG.legs&&TPG.legs.length?TPG.legs[0].name:"destinazione";
-    var resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:3000,system:"Sei un estrattore di dati di viaggio. Rispondi SOLO con JSON valido.",tools:[{type:"web_search_20250305",name:"web_search"}],messages:[{role:"user",content:"Analizza: "+url+"\nEstrai dati per "+dest+". Restituisci: {\"items\":[{\"type\":\"restaurant|excursion|museum|logistics|park|zone|event\",\"name\":\"...\",\"description\":\"...\",\"url\":\""+url+"\"}]}"}]})});
-    var data=await resp.json();
-    var text=(data.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text||"";}).join("").trim();
-    text=text.replace(/^```json\s*/i,"").replace(/```\s*$/i,"").trim();
-    var s=text.indexOf("{"),e2=text.lastIndexOf("}");
-    if(s!==-1&&e2>s)text=text.slice(s,e2+1);
-    var parsed=JSON.parse(text); var items=parsed.items||[]; var count=0;
-    items.forEach(function(item){var t=normalizeItemType(item.type||"");var arr=customLoad(t);arr.push(Object.assign({},item,{_custom:true,_id:Date.now()+Math.random(),source:"web_fetch",source_label:url,confidence:"medium"}));customSave(t,arr);count++;});
-    if(status)status.innerHTML="<div style='background:#D1FAE5;color:#065F46;padding:6px 10px;border-radius:6px'>✓ "+count+" elementi estratti.</div>";
-  } catch(err){
-    if(status)status.innerHTML="<div style='background:#FEE2E2;color:#991B1B;padding:6px 10px;border-radius:6px'>Errore: "+err.message+"</div>";
-  }
-}
-
 /* ============================================================
    GUIDE TAB
    ============================================================ */
